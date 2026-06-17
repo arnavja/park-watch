@@ -312,7 +312,7 @@ def build():
     p2.font.size = Pt(22); p2.font.color.rgb = ORANGE
 
     p3 = tx.text_frame.add_paragraph()
-    p3.text = "Demo · github.com/<repo> · arnavjain17032006@gmail.com"
+    p3.text = "park-watch.streamlit.app  ·  github.com/arnavja/park-watch  ·  arnavjain17032006@gmail.com"
     p3.alignment = PP_ALIGN.CENTER
     p3.font.size = Pt(14); p3.font.color.rgb = LIGHT
 
