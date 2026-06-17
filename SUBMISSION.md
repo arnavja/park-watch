@@ -69,6 +69,6 @@ https://github.com/arnavja/park-watch
 
 ---
 
-## Team — Byte Titans
+## Team — Byte_me_kaar
 
 - Arnav Jain ([@arnavja](https://github.com/arnavja)) — IIIT Bangalore, B.Tech DSAI 2nd year

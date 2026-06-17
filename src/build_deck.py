@@ -73,7 +73,7 @@ def add_metric_card(slide, left, top, width, height, value, label,
     p2.font.size = Pt(11); p2.font.color.rgb = GREY
 
 
-def add_footer(slide, prs, text="Park-Watch · Gridlock Hackathon · Team Byte Titans"):
+def add_footer(slide, prs, text="Park-Watch · Gridlock Hackathon · Team Byte_me_kaar"):
     fb = slide.shapes.add_textbox(
         0, prs.slide_height - Inches(0.35),
         prs.slide_width, Inches(0.3),
@@ -108,7 +108,7 @@ def build():
     p2.font.size = Pt(20); p2.font.color.rgb = ORANGE
 
     p3 = tx.text_frame.add_paragraph()
-    p3.text = "Team Byte Titans  ·  Gridlock Hackathon @ Flipkart HQ × BTP"
+    p3.text = "Team Byte_me_kaar  ·  Gridlock Hackathon @ Flipkart HQ × BTP"
     p3.alignment = PP_ALIGN.CENTER
     p3.font.size = Pt(14); p3.font.color.rgb = LIGHT
 

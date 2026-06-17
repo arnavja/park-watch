@@ -93,7 +93,7 @@ def main():
     # Footer
     draw.text(
         (50, H - 70),
-        "Gridlock Hackathon  ·  Flipkart HQ × BTP  ·  Team Byte Titans",
+        "Gridlock Hackathon  ·  Flipkart HQ × BTP  ·  Team Byte_me_kaar",
         font=_font(15), fill=LIGHT,
     )
     draw.text(

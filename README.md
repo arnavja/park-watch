@@ -99,7 +99,7 @@ park-watch/
     └── screens/                      Dashboard screenshots
 ```
 
-## Team — Byte Titans
+## Team — Byte_me_kaar
 
 - Arnav Jain — [@arnavja](https://github.com/arnavja)
 
