@@ -9,7 +9,7 @@ from folium.plugins import HeatMap, MarkerCluster
 from streamlit_folium import st_folium
 
 sys.path.insert(0, str(Path(__file__).parent))
-from data_loader import load
+from data_loader import FULL_DATASET_STATS, is_demo_mode, load
 
 OUT = Path(__file__).parent.parent / "outputs"
 
@@ -19,6 +19,13 @@ st.caption(
     "298K real BTP violations · 5 months · 381 hotspots clustered · "
     "Built for Gridlock Hackathon @ Flipkart HQ"
 )
+
+if is_demo_mode():
+    st.info(
+        "ℹ️  **Public demo mode** — running on a 30K-row stratified sample of "
+        "the 298K BTP dataset (raw data not redistributable). All headline "
+        "metrics shown reflect the full 298K analysis."
+    )
 
 
 @st.cache_data
@@ -56,7 +63,12 @@ if vehicle != "All":
 
 # ─── KPIs
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("Total violations", f"{len(f):,}")
+total_label = (
+    f"{FULL_DATASET_STATS['n_violations']:,}"
+    if is_demo_mode() and station == "All" and vehicle == "All"
+    else f"{len(f):,}"
+)
+c1.metric("Total violations", total_label)
 c2.metric("Hotspot clusters", f"{len(hot):,}")
 top_share = (
     f["police_station"].value_counts(normalize=True).head(5).sum() * 100

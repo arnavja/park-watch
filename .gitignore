@@ -3,7 +3,7 @@ data/violations.csv
 data/*.csv
 
 # Auto-regenerated caches
-data/*.parquet
+data/violations.parquet
 outputs/violations_clustered.parquet
 outputs/blr_drive.graphml
 outputs/full_dashboard.png
@@ -25,3 +25,4 @@ env/
 .vscode/
 .idea/
 *.swp
+cache/

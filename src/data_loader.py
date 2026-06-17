@@ -6,6 +6,15 @@ import pandas as pd
 
 DATA = Path(__file__).parent.parent / "data" / "violations.csv"
 CACHE = Path(__file__).parent.parent / "data" / "violations.parquet"
+SAMPLE = Path(__file__).parent.parent / "data" / "sample_violations.parquet"
+
+# Headline numbers from the FULL 298K dataset — used for KPIs in demo mode
+# so the dashboard still cites the real scale of the analysis.
+FULL_DATASET_STATS = {
+    "n_violations": 298_450,
+    "n_hotspots": 381,
+    "date_range": "Nov 2023 – Apr 2024",
+}
 
 
 def _parse_types(x):
@@ -15,7 +24,19 @@ def _parse_types(x):
         return []
 
 
+def is_demo_mode() -> bool:
+    """True when only the demo sample is available (no parquet cache built).
+
+    On Streamlit Cloud the raw 105 MB CSV is absent — the dashboard runs
+    on the 30K-row stratified sample shipped with the repo.
+    """
+    return SAMPLE.exists() and not CACHE.exists()
+
+
 def load(use_cache: bool = True) -> pd.DataFrame:
+    # Demo mode — use the shipped 30K-row stratified sample
+    if is_demo_mode():
+        return pd.read_parquet(SAMPLE)
     if use_cache and CACHE.exists():
         return pd.read_parquet(CACHE)
 
