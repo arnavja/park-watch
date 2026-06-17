@@ -24,7 +24,7 @@ Park-Watch turns **298,450 real BTP parking-violation records** (Nov 2023 – Ap
 
 ## The key insight
 
-**BTP officers book ~95% of violations between 8 AM and 3 PM.** From 6 PM onwards, only a few dozen violations are recorded across an entire 5-month window — not because illegal parking stops, but because officers go home. Park-Watch quantifies this enforcement coverage gap, predicts where violations will happen during it, and produces patrol routes that close it.
+**BTP officers book ~95% of violations before 3 PM, with peak activity 8 AM – noon.** After 3 PM, enforcement bookings drop sharply — and by 6 PM only a handful of violations are recorded across an entire 5-month window. That gap isn't because illegal parking stops; it's because officers go home. Park-Watch quantifies this enforcement coverage gap, predicts where violations will happen during it, and produces patrol routes that close it.
 
 ## Modules
 

@@ -92,7 +92,7 @@ def build():
     sections = [
         ("0:00 – 0:20",
          "Show top of dashboard with the title visible.",
-         "Hi, I'm Arnav from Team Byte_me_kaar, and this is Park-Watch — our submission for "
+         "Hi, I'm Arnav from Team Byte_me_kaar, and this is Park-Watch — my submission for "
          "Theme 1 of the Gridlock Hackathon.\n\n"
          "Bengaluru Traffic Police already collects rich data on illegal parking — almost "
          "three hundred thousand violation records in just five months. The problem isn't "
@@ -101,19 +101,19 @@ def build():
 
         ("0:20 – 0:50",
          "Hover over the bar chart in the 'enforcement blind spot' section.",
-         "Let me show you the most important thing we discovered.\n\n"
-         "Look at this bar chart. These are the hours when BTP books violations. From 8 AM "
-         "to 3 PM — tall bars. From 4 PM to midnight — almost nothing. Across five months, "
-         "only twenty-seven violations were booked at 7 PM. Twenty-seven. Across all of "
-         "Bengaluru.\n\n"
+         "Let me show you the most important thing I discovered.\n\n"
+         "Look at this bar chart. These are the hours when BTP books violations. Tall bars "
+         "all morning, peaking around 10 to 11 AM. After 2 PM, the chart falls off a cliff. "
+         "By 3 PM it's near zero. At 7 PM, across five entire months, only twenty-seven "
+         "violations were booked in all of Bengaluru. Twenty-seven.\n\n"
          "That's not because illegal parking stops in the evening. That's because officers "
-         "go home. BTP is blind for twelve hours a day, every single day."),
+         "go home. BTP is blind for roughly twelve hours every single day."),
 
         ("0:50 – 1:25",
          "Scroll down to the 'Congestion cost' section.",
-         "The first question we asked is — what does this cost the city?\n\n"
-         "For each hotspot, we pull the real road network from OpenStreetMap — lane count, "
-         "speed limit, geometry. Then we apply the standard BPR delay function from "
+         "The first question I asked is — what does this cost the city?\n\n"
+         "For each hotspot, I pull the real road network from OpenStreetMap — lane count, "
+         "speed limit, geometry. Then I apply the standard BPR delay function from "
          "transportation engineering. The result: the top one hundred parking hotspots cost "
          "Bengaluru three hundred eighty-nine crore rupees per year. That's roughly ten "
          "percent of the city's total congestion bill, coming from just one hundred zones.\n\n"
@@ -121,7 +121,7 @@ def build():
 
         ("1:25 – 2:05",
          "Scroll to the 'Blind-spot forecast' section.",
-         "Next, we built a forecasting model that predicts where violations will happen "
+         "Next, I built a forecasting model that predicts where violations will happen "
          "during the blind spot.\n\n"
          "XGBoost regression on 1.38 million hourly observations. Eleven features — calendar, "
          "autoregressive lags, location, vehicle mix. Strict chronological "
@@ -130,11 +130,11 @@ def build():
          "threshold. The model is small and well-regularised.\n\n"
          "What it tells us: across the top hundred hotspots, roughly seven hundred and "
          "twenty-two illegal-parking incidents will go unbooked in the next twenty-four "
-         "hours unless we do something different."),
+         "hours unless something changes."),
 
         ("2:05 – 2:40",
          "Scroll to the 'Tonight's optimized patrol plan' section — let the colored route map render.",
-         "So we converted the forecast into action.\n\n"
+         "So I converted the forecast into action.\n\n"
          "Weighted K-Means assigns hotspots across five patrols, balanced by expected "
          "catches. Within each patrol, nearest-neighbour TSP minimises travel time at "
          "twenty kilometres per hour with fifteen minutes of service per stop.\n\n"

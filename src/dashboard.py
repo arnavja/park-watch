@@ -88,7 +88,7 @@ hr_counts = (
 )
 st.bar_chart(hr_counts, x="hour", y="violations", height=240)
 st.caption(
-    "BTP officers book ~95% of violations between 8 AM–3 PM. Illegal parking "
+    "BTP officers book ~95% of violations before 3 PM (peak 8 AM–noon). Illegal parking "
     "continues 24/7 — but evening violations are systematically missed. "
     "**Park-Watch predicts where they happen.**"
 )

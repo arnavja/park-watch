@@ -147,7 +147,7 @@ def build():
     add_title_bar(s, prs, "Enforcement coverage gap",
                   "Temporal analysis of 298K bookings reveals a 12-hour visibility window")
     add_bullet_box(s, Inches(0.5), Inches(1.2), Inches(5.8), Inches(5.5), [
-        "95% of 298K bookings happen 8 AM – 3 PM.",
+        "~95% of 298K bookings happen before 3 PM, peaking 8 AM – noon.",
         "7–11 PM (peak commercial activity): only ~27, 42, 148, 725 violations booked across five months.",
         "This is not because illegal parking stops. It's because officers go home.",
         "Every evening, thousands of incidents are invisible to enforcement.",
