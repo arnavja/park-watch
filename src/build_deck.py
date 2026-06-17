@@ -254,7 +254,7 @@ def build():
     add_metric_card(s, Inches(0.5), Inches(1.3), Inches(3), Inches(1.4),
                      "5", "patrols deployed")
     add_metric_card(s, Inches(3.7), Inches(1.3), Inches(3), Inches(1.4),
-                     "37", "optimized stops (5-hr shift)")
+                     "49", "optimized stops (5-hr shift)")
     add_metric_card(s, Inches(6.9), Inches(1.3), Inches(3), Inches(1.4),
                      "113", "expected catches tonight")
     add_metric_card(s, Inches(10.1), Inches(1.3), Inches(2.9), Inches(1.4),

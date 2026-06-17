@@ -112,21 +112,24 @@ def build():
         ("0:50 – 1:25",
          "Scroll down to the 'Congestion cost' section.",
          "The first question I asked is — what does this cost the city?\n\n"
-         "For each hotspot, I pull the real road network from OpenStreetMap — lane count, "
-         "speed limit, geometry. Then I apply the standard BPR delay function from "
-         "transportation engineering. The result: the top one hundred parking hotspots cost "
-         "Bengaluru three hundred eighty-nine crore rupees per year. That's roughly ten "
-         "percent of the city's total congestion bill, coming from just one hundred zones.\n\n"
-         "KR Market Junction alone — sixteen crores per month."),
+         "For each hotspot, I snap to the nearest road segment using OpenStreetMap and pull "
+         "the real lane count. Then I apply the standard BPR delay function from "
+         "transportation engineering to translate lane-blockage into vehicle-hours lost. "
+         "Computed across the top one hundred hotspots, the city loses three hundred "
+         "eighty-nine crore rupees a year. That's roughly ten percent of Bengaluru's total "
+         "congestion bill, coming from just one hundred zones.\n\n"
+         "The single biggest one — KR Market Junction, in Upparpet — sixteen crores per "
+         "month, on its own."),
 
         ("1:25 – 2:05",
          "Scroll to the 'Blind-spot forecast' section.",
          "Next, I built a forecasting model that predicts where violations will happen "
          "during the blind spot.\n\n"
-         "XGBoost regression on 1.38 million hourly observations. Eleven features — calendar, "
-         "autoregressive lags, location, vehicle mix. Strict chronological "
-         "train-validation-test split with early stopping.\n\n"
-         "Test R-squared is 0.43. Train-to-test gap is 0.07, well below the overfit "
+         "XGBoost regression on 1.38 million hourly observations. Eleven features — "
+         "calendar, autoregressive lags, location, vehicle mix. Strict chronological "
+         "train, validation, test split with early stopping.\n\n"
+         "The held-out test R-squared is 0.43 — you can see it right here on the dashboard. "
+         "The train-to-test gap is just zero-point-zero-seven, well below the overfit "
          "threshold. The model is small and well-regularised.\n\n"
          "What it tells us: across the top hundred hotspots, roughly seven hundred and "
          "twenty-two illegal-parking incidents will go unbooked in the next twenty-four "
@@ -138,9 +141,10 @@ def build():
          "Weighted K-Means assigns hotspots across five patrols, balanced by expected "
          "catches. Within each patrol, nearest-neighbour TSP minimises travel time at "
          "twenty kilometres per hour with fifteen minutes of service per stop.\n\n"
-         "The output for tonight's evening shift: thirty-seven optimised stops, one hundred "
-         "and thirteen expected catches. That's four-point-five times what BTP catches "
-         "today, with the same officers and the same five-hour shift.\n\n"
+         "The output for tonight's evening shift: forty-nine optimised stops across the "
+         "five patrols, one hundred and thirteen expected catches in total. That's "
+         "four-point-five times what BTP catches today, with the same officers and the "
+         "same five-hour shift.\n\n"
          "No new sensors. No new cameras. Just a smarter route."),
 
         ("2:40 – 3:00",

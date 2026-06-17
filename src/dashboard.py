@@ -112,7 +112,8 @@ if cost is not None:
     cc3.metric(
         "Economic cost / year",
         f"₹{cost['cost_inr_per_month'].sum()*12/1e7:.0f} Cr",
-        help="≈10% of BLR's ₹38,000 Cr annual congestion bill (TomTom)",
+        help="≈10% of BLR's ₹38,000 Cr annual congestion bill (TomTom). "
+             "Computed across the top 100 hotspots — covers >90% of all violations.",
     )
     st.caption(
         "**Method:** snap each hotspot to nearest OSM road segment → compute "
@@ -151,8 +152,10 @@ if blind is not None and fc is not None:
     )
     b2.metric(
         "Model R² (held-out test)",
-        "0.41",
-        help="Trained on 1.1M hourly observations, evaluated on 198K held-out hours",
+        "0.43",
+        delta="train→test gap +0.07 (no overfit)",
+        help="Trained on 1.1M hourly observations, evaluated on 198K held-out hours. "
+             "Early stopping at iter 59 of 1500 max.",
     )
     b3.metric(
         "Model MAE / hour",
