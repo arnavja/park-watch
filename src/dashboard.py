@@ -52,7 +52,15 @@ station = st.sidebar.selectbox("Police station", stations)
 hour_range = st.sidebar.slider("Hour of day", 0, 23, (0, 23))
 vehicle_types = ["All"] + sorted(df["vehicle_type"].dropna().unique().tolist())
 vehicle = st.sidebar.selectbox("Vehicle type", vehicle_types)
-top_n = st.sidebar.slider("Top-N hotspots", 10, 100, 30)
+top_n = st.sidebar.slider(
+    "Hotspots shown on map", 10, 100, 100,
+    help=(
+        "Controls how many of the 381 hotspots are plotted on the map and "
+        "shown in the priority table. Cost and patrol-plan calculations "
+        "always use the top 100 hotspots — they cover >90% of all 298K "
+        "violations."
+    ),
+)
 
 f = df.copy()
 if station != "All":
