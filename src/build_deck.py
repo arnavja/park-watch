@@ -265,6 +265,7 @@ def build():
         "Weighted KMeans → fair workload assignment by expected catches.",
         "Nearest-neighbor TSP within each patrol minimizes travel time.",
         "20 km/h urban speed + 15 min service per zone.",
+        "Patrol count is a parameter — demo shows 5; in deployment, scales to BTP's actual nightly fleet.",
         "Output: per-officer schedule with ETA, stop sequence, expected catches.",
         "Same officer-hours, same budget. 4.5× more enforcement output.",
     ], size=12)
