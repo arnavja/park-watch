@@ -9,6 +9,10 @@ outputs/blr_drive.graphml
 outputs/full_dashboard.png
 outputs/screens/full_dashboard.png
 
+# Internal submission scaffolding — keep private
+SUBMISSION.md
+outputs/Demo_Video_Script.docx
+
 # Python
 __pycache__/
 *.py[cod]
