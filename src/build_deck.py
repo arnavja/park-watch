@@ -232,6 +232,7 @@ def build():
         "70/15/15 chronological split, early stopping at iter 59 of 1500.",
         "Train R² 0.50 → Test R² 0.43 → gap +0.07 (≪ 0.15 threshold) → no overfit.",
         "Forecast: 24h per hotspot, blind-spot hours aggregated for patrol planning.",
+        "Limitation: dataset captures booked violations, not all events. Forecast is a testable hypothesis a 1-week BTP pilot can validate.",
     ], size=12)
     img = SCREENS / "03_forecast.png"
     if img.exists():

@@ -151,7 +151,11 @@ def build():
          "than validation, which tells me the model generalizes — it isn't memorizing.\n\n"
          "What does the forecast tell us? Across the top hundred hotspots, roughly seven "
          "hundred and twenty-two illegal parking incidents will go unbooked in the next "
-         "twenty-four hours, unless something changes."),
+         "twenty-four hours, unless something changes.\n\n"
+         "One honest caveat: the dataset captures booked violations, not every illegal "
+         "parking event. So the model predicts violation density extrapolated from "
+         "observed booking patterns — it's a testable hypothesis a one-week BTP pilot "
+         "could validate."),
 
         ("4:10 – 4:50",
          "Scroll to 'Tonight's optimized patrol plan'. Let the colour-coded route map render before speaking.",
