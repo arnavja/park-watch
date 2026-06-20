@@ -46,12 +46,7 @@ def get_data():
 df, hot, cost, blind, fc, routes = get_data()
 
 # ─── sidebar filters
-st.sidebar.header("Filters")
-stations = ["All"] + sorted(df["police_station"].dropna().unique().tolist())
-station = st.sidebar.selectbox("Police station", stations)
-hour_range = st.sidebar.slider("Hour of day", 0, 23, (0, 23))
-vehicle_types = ["All"] + sorted(df["vehicle_type"].dropna().unique().tolist())
-vehicle = st.sidebar.selectbox("Vehicle type", vehicle_types)
+st.sidebar.header("Display options")
 top_n = st.sidebar.slider(
     "Hotspots shown on map", 10, 100, 100,
     help=(
@@ -61,6 +56,15 @@ top_n = st.sidebar.slider(
         "violations."
     ),
 )
+st.sidebar.caption(
+    "Headline metrics, the cost model, and patrol routes are computed "
+    "over the full 298K-record dataset and the top 100 hotspots."
+)
+
+# No filtering — the dashboard reflects the full dataset
+station = "All"
+vehicle = "All"
+hour_range = (0, 23)
 
 f = df.copy()
 if station != "All":
