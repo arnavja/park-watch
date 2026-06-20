@@ -177,6 +177,8 @@ def build():
          "enforcement blind spot. It runs on the data BTP already collects. No new "
          "sensors. No new cameras. And every officer keeps doing what they already do — "
          "just smarter.\n\n"
+         "Park-Watch doesn't replace patrols. It makes them predictive instead of "
+         "reactive — which is the actual gap the brief names.\n\n"
          "Thank you."),
     ]
 
