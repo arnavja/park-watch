@@ -297,7 +297,185 @@ def build():
     ], size=15)
     add_footer(s, prs)
 
-    # ── 10 · CALL TO ACTION
+    # ── 10 · ARCHITECTURE DIAGRAM
+    s = prs.slides.add_slide(blank)
+    add_title_bar(s, prs, "End-to-end architecture",
+                  "Data → analysis → decision  ·  6 modules, 1 dashboard, daily/weekly/monthly retrain")
+
+    box_w = Inches(2.0); box_h = Inches(1.0); box_y = Inches(1.8)
+    gap = Inches(0.15)
+    arrows_y = Inches(2.3)
+    pal = [
+        ("BTP CSV\n298,450 rows", RGBColor(0x6B, 0x88, 0xB0)),
+        ("Loader +\nParquet cache", RGBColor(0x6B, 0x88, 0xB0)),
+        ("DBSCAN\n381 hotspots", ORANGE),
+        ("OSMnx + BPR\n₹389 Cr/yr", ORANGE),
+        ("XGBoost\nR²=0.43", ORANGE),
+        ("KMeans + TSP\npatrol routes", ORANGE),
+    ]
+    x = Inches(0.4)
+    for label, colour in pal:
+        b = s.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE, x, box_y, box_w, box_h
+        )
+        b.fill.solid(); b.fill.fore_color.rgb = colour
+        b.line.fill.background()
+        tf = b.text_frame; tf.word_wrap = True
+        p = tf.paragraphs[0]; p.text = label
+        p.alignment = PP_ALIGN.CENTER
+        p.font.size = Pt(11); p.font.bold = True
+        p.font.color.rgb = WHITE
+        x += box_w + gap
+
+    # downward arrow to dashboard
+    dash = s.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, Inches(3.5), Inches(4.2),
+        Inches(6.3), Inches(1.0),
+    )
+    dash.fill.solid(); dash.fill.fore_color.rgb = NAVY
+    dash.line.fill.background()
+    dtf = dash.text_frame
+    dp = dtf.paragraphs[0]
+    dp.text = "Streamlit + Folium dashboard"
+    dp.alignment = PP_ALIGN.CENTER
+    dp.font.size = Pt(16); dp.font.bold = True; dp.font.color.rgb = WHITE
+    dp2 = dtf.add_paragraph()
+    dp2.text = "Live patrol-count slider · per-officer shift sheet · TSP re-planner"
+    dp2.alignment = PP_ALIGN.CENTER
+    dp2.font.size = Pt(11); dp2.font.color.rgb = LIGHT
+
+    # feedback loop arrow
+    fb = s.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.5), Inches(5.6),
+        Inches(12.3), Inches(0.7),
+    )
+    fb.fill.solid(); fb.fill.fore_color.rgb = LIGHT
+    fb.line.color.rgb = ORANGE
+    fb.line.width = Pt(1.5)
+    fbtf = fb.text_frame
+    fp = fbtf.paragraphs[0]
+    fp.text = ("Production feedback loop: each shift's bookings retrain tomorrow's "
+                "forecast · weekly full retrain · monthly DBSCAN re-cluster")
+    fp.alignment = PP_ALIGN.CENTER
+    fp.font.size = Pt(11); fp.font.color.rgb = NAVY; fp.font.italic = True
+
+    add_footer(s, prs)
+
+    # ── 11 · METHODOLOGY DEPTH
+    s = prs.slides.add_slide(blank)
+    add_title_bar(s, prs, "Methodology — defensible knobs",
+                  "Every number on the dashboard has explicit, auditable math behind it")
+
+    # Left: BPR + cost model
+    add_bullet_box(s, Inches(0.5), Inches(1.2), Inches(6.3), Inches(2.5), [
+        "BPR delay model (Bureau of Public Roads, US-DOT standard):",
+        "   t = t_free · (1 + α · (v/c)^β)    α=0.15  β=4",
+        "Capacity loss per zone = viol/day × dwell_min ÷ (lanes × 1440)",
+        "Value-of-time = ₹200/hr (GoK Economic Survey baseline)",
+        "Cost cap: delay ratio clipped at 5× for conservative reporting",
+    ], size=11)
+
+    # Right: XGBoost hyperparameters
+    add_bullet_box(s, Inches(6.9), Inches(1.2), Inches(6.0), Inches(2.5), [
+        "XGBoost regressor — tuned for generalization:",
+        "   n_estimators=1500   max_depth=6   lr=0.05",
+        "   subsample=0.8   colsample_bytree=0.8   reg_lambda=1.0",
+        "   min_child_weight=5   early_stopping=30 rounds",
+        "Best iter=54  ·  test R²=0.43  ·  train→test gap +0.07",
+    ], size=11)
+
+    # Bottom: feature importance
+    add_bullet_box(s, Inches(0.5), Inches(4.0), Inches(12.4), Inches(3), [
+        "Feature importance (top 10) — recent activity + calendar dominate:",
+        "   lag-1h 0.34  ·  roll-7d 0.16  ·  lag-7d 0.07  ·  hour 0.06  ·  lag-24h 0.05",
+        "   top-vehicle-idx 0.03  ·  lat 0.03  ·  is-festival 0.03  ·  is-festival-window 0.03  ·  day-of-year 0.03",
+        "Sample weights: 90-day exponential decay — recent data weighted higher, model adapts to evolving patrol patterns",
+        "Calendar features: festivals (Diwali, Ganesh Chaturthi, Onam), monsoon (Jun-Sep), week-of-year, festival-window flags",
+    ], size=12)
+    add_footer(s, prs)
+
+    # ── 12 · PER-OFFICER SHIFT SHEET
+    s = prs.slides.add_slide(blank)
+    add_title_bar(s, prs, "Per-officer shift sheet — live tracking",
+                  "v1 already delivers adaptive per-officer routing")
+
+    add_bullet_box(s, Inches(0.5), Inches(1.2), Inches(5.8), Inches(5.5), [
+        "Each patrol gets a dropdown-selectable shift sheet with step-by-step orders.",
+        "Step format: arrive time · depart time · travel min · expected catches · location.",
+        "\"Mark stop done\" button advances state — remaining stops re-sequence live.",
+        "Nearest-neighbour TSP replans from current position when an officer completes a stop.",
+        "Time-budget guard: if replanned route overruns shift, system flags lowest-value stop to drop.",
+        "Download button: shift sheet exports as plain TXT — printable, WhatsApp-able.",
+    ], size=13)
+
+    img = SCREENS / "05_patrol_routes.png"
+    if img.exists():
+        s.shapes.add_picture(
+            str(img), Inches(6.5), Inches(1.2),
+            width=Inches(6.5), height=Inches(5.0),
+        )
+        cap = s.shapes.add_textbox(Inches(6.5), Inches(6.3),
+                                     Inches(6.5), Inches(0.3))
+        cp = cap.text_frame.paragraphs[0]
+        cp.text = "Live dashboard — per-officer shift sheet (Upparpet patrol)"
+        cp.alignment = PP_ALIGN.CENTER
+        cp.font.size = Pt(10); cp.font.italic = True; cp.font.color.rgb = GREY
+    add_footer(s, prs)
+
+    # ── 13 · PRODUCTION ROADMAP
+    s = prs.slides.add_slide(blank)
+    add_title_bar(s, prs, "Production roadmap",
+                  "v1 ships now — v2 adds personalized learning per officer")
+
+    # 4-column timeline
+    cols = [
+        ("Day 0 — v1 deployment",
+         "Streamlit dashboard live\nWeekly cron-scheduled retrain\nShift sheet exports to PDF/TXT/WhatsApp\nBTP officers patrol off the printed sheet"),
+        ("Week 1–4 — pilot",
+         "5 patrols × 5 hrs/night\nGround-truth catch rate measured\nForecast accuracy validated\nDataset doubles as evening data accumulates"),
+        ("Month 2–3 — v1.5",
+         "Mobile app for officers\nMark-stop-done in field\nLive route replan after each stop\nTime-budget warnings"),
+        ("Month 4+ — v2",
+         "Per-officer learning model\nIndividual pace + skill profile\nPersonalized routes per officer\nMulti-armed bandit zone exploration"),
+    ]
+    cw = Inches(3.0); ch = Inches(4.5); cy = Inches(1.3)
+    cx = Inches(0.4)
+    for title, body in cols:
+        box = s.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE, cx, cy, cw, ch
+        )
+        box.fill.solid(); box.fill.fore_color.rgb = LIGHT
+        box.line.color.rgb = ORANGE
+        box.line.width = Pt(1.5)
+        tf = box.text_frame; tf.word_wrap = True
+        tf.margin_top = Inches(0.2); tf.margin_left = Inches(0.15)
+        tf.margin_right = Inches(0.15); tf.margin_bottom = Inches(0.2)
+        p = tf.paragraphs[0]; p.text = title
+        p.font.bold = True; p.font.size = Pt(13); p.font.color.rgb = ORANGE
+        for line in body.split("\n"):
+            p2 = tf.add_paragraph()
+            p2.text = "•  " + line
+            p2.font.size = Pt(11); p2.font.color.rgb = NAVY
+            p2.space_after = Pt(4)
+        cx += cw + Inches(0.15)
+    add_footer(s, prs)
+
+    # ── 14 · RISK / LIMITATIONS
+    s = prs.slides.add_slide(blank)
+    add_title_bar(s, prs, "Limitations and risk register",
+                  "Honest engineering — every assumption is auditable")
+
+    add_bullet_box(s, Inches(0.5), Inches(1.3), Inches(12.5), Inches(5.5), [
+        "DATASET CAPTURES BOOKINGS, NOT ALL VIOLATIONS — forecast extrapolates from booked patterns. A 1-week BTP pilot validates the forecast in the wild.",
+        "PATROL FLEET SIZE IS A PARAMETER — demo runs 5 patrols. In deployment, BTP supplies actual nightly fleet count (likely 50–200). Routes scale linearly.",
+        "BPR ASSUMPTIONS — dwell time (12 min), value-of-time (₹200/hr), lane capacity (1800 vph) are explicit knobs at the top of congestion_cost.py.",
+        "OSM ROAD METADATA — lane counts and speed limits default to 2 lanes / 30 km/h when missing. Affects ~5% of edges in Bengaluru.",
+        "EVENING DATA IS SPARSE — model trained on bookings from active enforcement hours. Predictions for 18:00–07:00 are extrapolations. Bootstraps once patrols arrive.",
+        "MODEL DECAY RISK — without weekly retrain, accuracy drops as patrol patterns shift. Production cron-schedule prevents this.",
+    ], size=13)
+    add_footer(s, prs)
+
+    # ── FINAL · CALL TO ACTION
     s = prs.slides.add_slide(blank)
     bg = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0,
                               prs.slide_width, prs.slide_height)
