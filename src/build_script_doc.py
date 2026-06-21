@@ -92,20 +92,20 @@ def build():
     sections = [
         ("0:00 – 0:30",
          "Wait 2 seconds after hitting record. Dashboard header visible.",
-         "Hi, I'm Arnav Jain, and this is Park-Watch — my submission for Theme One of the "
+         "Hi, I'm Arnav Jain, and this is Park-Watch — my submission for Theme 1 of the "
          "Gridlock Hackathon, Team Byte_me_kaar.\n\n"
          "Bengaluru Traffic Police already collects rich data on illegal parking — almost "
-         "three hundred thousand violation records in just five months. The problem isn't a "
-         "lack of data. The problem is that BTP can't see the patterns inside it, and they "
-         "can't act on those patterns in real time. Park-Watch fixes both."),
+         "300,000 violation records in just 5 months. The problem isn't a lack of data. The "
+         "problem is that BTP can't see the patterns inside it, and they can't act on those "
+         "patterns in real time. Park-Watch fixes both."),
 
         ("0:30 – 1:10",
          "Briefly hover over the dashboard so the BTP theme framing lands. Slow cursor.",
-         "The hackathon brief, from BTP themselves, says three things. Enforcement is "
+         "The hackathon brief, from BTP themselves, says 3 things. Enforcement is "
          "patrol-based and reactive. There's no heatmap of parking violations against their "
          "congestion impact. And it's difficult to prioritize which zones deserve "
          "enforcement effort.\n\n"
-         "These are operational problems, not data problems. So I built four analytical "
+         "These are operational problems, not data problems. So I built 4 analytical "
          "modules on the data BTP already has — and combined them into a single dashboard "
          "an officer can use during a shift."),
 
@@ -113,82 +113,80 @@ def build():
          "Hover over the bar chart titled 'The 12-hour enforcement blind spot'.",
          "Before I explain the modules, look at this chart. These are the hours when BTP "
          "books violations. Tall bars all morning, peaking around 10 to 11 AM. After 2 PM, "
-         "the chart falls off a cliff. By 3 PM, it's near zero. At 7 PM, across five entire "
-         "months, only twenty-seven violations were booked in all of Bengaluru. "
-         "Twenty-seven.\n\n"
+         "the chart falls off a cliff. By 3 PM, it's near zero. At 7 PM, across 5 entire "
+         "months, only 27 violations were booked in all of Bengaluru. 27.\n\n"
          "That's not because illegal parking stops. That's because officers go home. BTP is "
-         "structurally blind for roughly twelve hours every single day.\n\n"
+         "structurally blind for roughly 12 hours every single day.\n\n"
          "This gap is the operational insight Park-Watch is built around. The rest of the "
          "system — cost quantification, forecasting, patrol routing — all exist to close it."),
 
         ("2:10 – 3:10",
          "Scroll down to the 'Congestion cost' section. Hover briefly over the ₹389 Cr metric.",
          "First question — what does this cost the city?\n\n"
-         "For each of the three hundred eighty-one hotspots that my DBSCAN clustering "
-         "identified, I snap to the nearest road segment using OpenStreetMap and pull the "
-         "real lane count. Then I apply the BPR delay function — the standard equation used "
-         "by every transport-planning authority in the world. When capacity drops because a "
-         "lane is blocked by illegal parking, delay grows non-linearly.\n\n"
-         "Computed across the top one hundred hotspots — which together cover over ninety "
-         "percent of all violations — the city loses three hundred eighty-nine crore rupees "
-         "a year. That's roughly ten percent of Bengaluru's total congestion bill, "
-         "attributable to just one hundred parking zones.\n\n"
-         "The single biggest one — KR Market Junction, in Upparpet — costs sixteen crores "
-         "per month, on its own. And every assumption in this calculation — dwell time, "
-         "value of time, lane capacity — is an explicit, defensible knob."),
+         "For each of the 381 hotspots that my DBSCAN clustering identified, I snap to the "
+         "nearest road segment using OpenStreetMap and pull the real lane count. Then I "
+         "apply the BPR delay function — the standard equation used by every "
+         "transport-planning authority in the world. When capacity drops because a lane is "
+         "blocked by illegal parking, delay grows non-linearly.\n\n"
+         "Computed across the top 100 hotspots — which together cover over 90 percent of "
+         "all violations — the city loses ₹389 crore a year. That's roughly 10 percent of "
+         "Bengaluru's total congestion bill, attributable to just 100 parking zones.\n\n"
+         "The single biggest one — KR Market Junction, in Upparpet — costs ₹16 crore per "
+         "month, on its own. And every assumption in this calculation — dwell time, value "
+         "of time, lane capacity — is an explicit, defensible knob."),
 
         ("3:10 – 4:10",
          "Scroll to 'Blind-spot forecast'. Hover over the R² metric so the train→test gap delta is visible.",
          "Next, I built a forecasting model that predicts where violations will happen "
          "during the blind spot.\n\n"
-         "XGBoost regression on one-point-three-eight million hourly observations. The "
-         "features cover calendar effects, recent activity lags, geographic location, and "
-         "vehicle mix. A strict chronological train, validation, and test split, with "
-         "early stopping at iteration fifty-nine.\n\n"
-         "The held-out test R-squared is point four three — visible right here on the "
-         "dashboard. The train-to-test gap is just point zero seven, well below the "
-         "overfit threshold. Importantly, the test set actually performs slightly better "
-         "than validation, which tells me the model generalizes — it isn't memorizing.\n\n"
-         "What does the forecast tell us? Across the top hundred hotspots, roughly seven "
-         "hundred and twenty-two illegal parking incidents will go unbooked in the next "
-         "twenty-four hours, unless something changes.\n\n"
+         "XGBoost regression on 1.38 million hourly observations. The features cover "
+         "calendar effects, recent activity lags, geographic location, and vehicle mix. A "
+         "strict chronological train, validation, and test split, with early stopping at "
+         "iteration 59.\n\n"
+         "The held-out test R-squared is 0.43 — visible right here on the dashboard. The "
+         "train-to-test gap is just 0.07, well below the overfit threshold. Importantly, "
+         "the test set actually performs slightly better than validation, which tells me "
+         "the model generalizes — it isn't memorizing.\n\n"
+         "What does the forecast tell us? Across the top 100 hotspots, roughly 722 illegal "
+         "parking incidents will go unbooked in the next 24 hours, unless something "
+         "changes.\n\n"
          "One honest caveat: the dataset captures booked violations, not every illegal "
          "parking event. So the model predicts violation density extrapolated from "
-         "observed booking patterns — it's a testable hypothesis a one-week BTP pilot "
-         "could validate."),
+         "observed booking patterns — it's a testable hypothesis a 1-week BTP pilot could "
+         "validate."),
 
         ("4:10 – 4:50",
          "Scroll to 'Tonight's optimized patrol plan'. Let the colour-coded route map render before speaking.",
          "So I converted the forecast into action.\n\n"
-         "Weighted K-Means assigns hotspots across five patrols, balanced by expected "
+         "Weighted K-Means assigns hotspots across 5 patrols, balanced by expected "
          "catches. Within each patrol, nearest-neighbour TSP minimises travel time at "
-         "twenty kilometres per hour, with fifteen minutes of service time per stop.\n\n"
-         "Note — five patrols is a demo scenario. The optimizer is parameterized, so in "
+         "20 km per hour, with 15 minutes of service time per stop.\n\n"
+         "Note — 5 patrols is a demo scenario. The optimizer is parameterized, so in "
          "deployment, BTP would provide their actual nightly fleet size and the routes "
          "scale to match.\n\n"
-         "The output for tonight's evening shift — fifty-four optimised stops across the "
-         "five patrols, roughly ninety-one expected catches in total. That's about "
-         "three-point-six times what BTP catches today, with the same officers and the "
-         "same five-hour shift. And the patrol count is parameterised — slide it up, "
-         "the routes recompute live."),
+         "The output for tonight's evening shift — 54 optimised stops across the 5 "
+         "patrols, roughly 91 expected catches in total. That's about 3.6× what BTP "
+         "catches today, with the same officers and the same 5-hour shift. And the patrol "
+         "count is parameterised — slide it up, the routes recompute live."),
 
         ("4:50 – 5:15",
          "Scroll to the very bottom — the 'Hotspot priority list' table. Briefly scroll through it.",
          "Finally, every prediction in Park-Watch is interrogable.\n\n"
-         "This is the hotspot priority list — three hundred and eighty-one zones, ranked, "
-         "with the responsible police station, the BTP junction code, the dominant vehicle "
-         "type, the morning, evening, night, and weekend share, and the actual address. A "
-         "BTP officer can drill into any number on the screen.\n\n"
+         "This is the hotspot priority list — 381 zones, ranked, with the responsible "
+         "police station, the BTP junction code, the dominant vehicle type, the morning, "
+         "evening, night, and weekend share, and the actual address. A BTP officer can "
+         "drill into any number on the screen.\n\n"
          "No black box. Every claim Park-Watch makes points back to real data."),
 
         ("5:15 – 5:30",
          "Slow-scroll back up to the top of the dashboard. Steady cursor.",
-         "Park-Watch is the intelligence layer that closes Bengaluru's twelve-hour "
-         "enforcement blind spot. It runs on the data BTP already collects. No new "
-         "sensors. No new cameras. And every officer keeps doing what they already do — "
-         "just smarter.\n\n"
+         "Park-Watch is the intelligence layer that closes Bengaluru's 12-hour enforcement "
+         "blind spot. It runs on the data BTP already collects. No new sensors. No new "
+         "cameras. And every officer keeps doing what they already do — just smarter.\n\n"
          "Park-Watch doesn't replace patrols. It makes them predictive instead of "
          "reactive — which is the actual gap the brief names.\n\n"
+         "And the system gets better with use. Each shift's bookings retrain tomorrow's "
+         "forecast — Park-Watch bootstraps as the patrol patterns expand.\n\n"
          "Thank you."),
     ]
 

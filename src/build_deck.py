@@ -177,7 +177,8 @@ def build():
         "2.  CONGESTION COST — OSMnx road graph + BPR delay model → ₹/month lost at each zone.",
         "3.  BLIND-SPOT FORECAST — XGBoost on 1.38M hourly cells → predicts where evening violations will happen.",
         "4.  PATROL OPTIMIZER — Weighted KMeans + nearest-neighbor TSP → tonight's optimal patrol routes.",
-        "5.  DASHBOARD — Streamlit + Folium, filterable by station / hour / vehicle for live BTP use.",
+        "5.  DASHBOARD — Streamlit + Folium, with live patrol-count slider for BTP shift planning.",
+        "6.  FEEDBACK LOOP — Production: weekly retrain on new BTP bookings. Each shift's data improves tomorrow's forecast.",
     ], size=16)
     add_footer(s, prs)
 
