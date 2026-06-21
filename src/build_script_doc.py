@@ -166,7 +166,11 @@ def build():
          "Bengaluru. Heat-density overlay shows the parking pressure; red dots are the top "
          "100 zones ranked by violation count. The dense red cluster in central BLR is "
          "Upparpet — KR Market, Shivajinagar, Chickpet. Every dot is clickable, and the "
-         "popup shows the station, the junction, the dominant vehicle, the cost per month."),
+         "popup shows the station, the junction, the dominant vehicle, and the cost per "
+         "month.\n\n"
+         "Both inputs are configurable in the sidebar — the number of hotspots shown on "
+         "the map, and the number of patrols deployed for tonight's shift. The system "
+         "recomputes routes and ETAs live as you change them."),
 
         ("4:35 – 5:10",
          "Scroll to 'Tonight's optimized patrol plan'. Let the colour-coded route map render before speaking.",
@@ -179,8 +183,7 @@ def build():
          "scale to match.\n\n"
          "The output for tonight's evening shift — 53 optimised stops across the 5 "
          "patrols, roughly 96 expected catches in total. That's about 3.8× what BTP "
-         "catches today, with the same officers and the same 5-hour shift. And the patrol "
-         "count is parameterised — slide it up, the routes recompute live."),
+         "catches today, with the same officers and the same 5-hour shift."),
 
         ("5:10 – 5:40",
          "Scroll to 'Per-officer shift sheet — live tracking'. Pick a patrol from dropdown. "
