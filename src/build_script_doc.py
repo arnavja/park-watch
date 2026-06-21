@@ -148,7 +148,7 @@ def build():
          "Strict chronological train, validation, and test split, with early stopping at "
          "iteration 54.\n\n"
          "The held-out test R-squared is 0.43 — visible right here on the dashboard. The "
-         "train-to-test gap is just 0.067, well below the overfit threshold. Importantly, "
+         "train-to-test gap is just 0.07, well below the overfit threshold. Importantly, "
          "the test set actually performs slightly better than validation, which tells me "
          "the model generalizes — it isn't memorizing.\n\n"
          "What does the forecast tell us? Across the top 100 hotspots, roughly 743 illegal "
