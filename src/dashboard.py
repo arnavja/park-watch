@@ -361,6 +361,88 @@ if routes is not None and len(routes):
             st.dataframe(show, use_container_width=True, hide_index=True)
     st.markdown("---")
 
+    # ─── Per-officer shift sheet (printable instructions per patrol)
+    st.subheader("📋 Per-officer shift sheet")
+    st.caption(
+        "Step-by-step orders for the officer on duty. Hand to BTP via WhatsApp "
+        "or print before the shift. Each step lists the destination, arrival "
+        "time, travel duration, and the expected number of catchable violations."
+    )
+    homes = sorted(routes["patrol_home"].unique())
+    selected = st.selectbox(
+        "Select patrol", homes,
+        format_func=lambda h: f"🚓 Officer @ {h}",
+    )
+    pgrp = routes[routes["patrol_home"] == selected].sort_values("seq")
+    pcatches = pgrp["expected_catches"].sum()
+    first_arr = pgrp.iloc[0]["arrive"] if len(pgrp) else "—"
+    last_dep = pgrp.iloc[-1]["depart"] if len(pgrp) else "—"
+
+    s1, s2, s3 = st.columns(3)
+    s1.metric("Stops tonight", len(pgrp))
+    s2.metric("Expected catches", f"~{pcatches:.0f}")
+    s3.metric("Shift window", f"{first_arr} – {last_dep}")
+
+    st.markdown(f"#### 📝 Orders — Officer based at **{selected}**")
+    st.markdown(
+        f"**Shift start 18:00 · home base: {selected}**  \n"
+        f"Proceed to the first stop. Issue tickets to illegally parked "
+        f"vehicles using your e-challan device. Mark each stop as completed in "
+        f"the app and proceed to the next."
+    )
+
+    for _, r in pgrp.iterrows():
+        catches = float(r["expected_catches"])
+        cat_word = (
+            "very high (>10)" if catches > 10 else
+            "high (3–10)" if catches > 3 else
+            "moderate (1–3)" if catches > 1 else
+            "low (<1)"
+        )
+        st.markdown(
+            f"**Step {int(r['seq'])} → {r['top_station']}**  \n"
+            f"📍 {r['top_junction']}  \n"
+            f"🕐 Arrive **{r['arrive']}** · Depart **{r['depart']}** "
+            f"· Travel **{int(r['travel_min'])} min**  \n"
+            f"🎯 Expected catches: **{catches:.1f}** ({cat_word})  \n"
+            f"---"
+        )
+
+    st.markdown(
+        f"**Shift end {last_dep} · return to {selected}.**  \n"
+        f"Total expected enforcement output: **~{pcatches:.0f} bookings** "
+        f"across **{len(pgrp)} zones**."
+    )
+
+    # Downloadable per-officer sheet
+    sheet_lines = [
+        f"PARK-WATCH — Nightly Shift Sheet",
+        f"=" * 50,
+        f"Officer based at: {selected}",
+        f"Shift: 18:00 – 23:00",
+        f"Total stops: {len(pgrp)}",
+        f"Expected catches: ~{pcatches:.0f}",
+        f"",
+    ]
+    for _, r in pgrp.iterrows():
+        sheet_lines.append(
+            f"Step {int(r['seq']):>2}. {r['arrive']} → {r['top_station']:<20} "
+            f"({r['top_junction']:<40}) "
+            f"~{float(r['expected_catches']):.1f} catches "
+            f"({int(r['travel_min'])} min travel)"
+        )
+    sheet_lines.append("")
+    sheet_lines.append("End of shift sheet.")
+    sheet_txt = "\n".join(sheet_lines)
+    st.download_button(
+        "📥 Download this patrol's shift sheet (TXT)",
+        sheet_txt,
+        file_name=f"shift_sheet_{selected.replace(' ', '_').replace('(', '').replace(')', '')}.txt",
+        mime="text/plain",
+    )
+
+    st.markdown("---")
+
 # ─── HOTSPOT TABLE
 st.subheader("📋 Hotspot priority list")
 show = hot_n[[
