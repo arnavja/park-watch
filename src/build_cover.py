@@ -83,7 +83,7 @@ def main():
     stats = [
         ("298,450", "real BTP violations analysed"),
         ("₹389 Cr", "annual congestion cost mapped"),
-        ("4.5×", "patrol enforcement output"),
+        ("~3.6×", "patrol enforcement output"),
     ]
     for value, label in stats:
         draw.text((50, y), value, font=_font(28, bold=True), fill=ORANGE)

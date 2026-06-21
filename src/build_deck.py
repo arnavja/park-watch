@@ -257,9 +257,9 @@ def build():
     add_metric_card(s, Inches(3.7), Inches(1.3), Inches(3), Inches(1.4),
                      "49", "optimized stops (5-hr shift)")
     add_metric_card(s, Inches(6.9), Inches(1.3), Inches(3), Inches(1.4),
-                     "113", "expected catches tonight")
+                     "~91", "expected catches tonight")
     add_metric_card(s, Inches(10.1), Inches(1.3), Inches(2.9), Inches(1.4),
-                     "4.5 ×", "vs current BTP output (~25)")
+                     "~3.6×", "vs current BTP output (~25)")
     add_bullet_box(s, Inches(0.5), Inches(3.0), Inches(5.5), Inches(4), [
         "Patrols home-base: 5 real BTP stations — Upparpet, Shivajinagar, Malleshwaram, HAL Old Airport, Vijayanagara.",
         "Weighted KMeans → fair workload assignment by expected catches.",
@@ -267,7 +267,7 @@ def build():
         "20 km/h urban speed + 15 min service per zone.",
         "Patrol count is a parameter — demo shows 5; in deployment, scales to BTP's actual nightly fleet.",
         "Output: per-officer schedule with ETA, stop sequence, expected catches.",
-        "Same officer-hours, same budget. 4.5× more enforcement output.",
+        "Same officer-hours, same budget. ~3.6× more enforcement output.",
     ], size=12)
     img = SCREENS / "04_hotspot_map.png"
     if img.exists():
@@ -288,7 +288,7 @@ def build():
     add_title_bar(s, prs, "Alignment with judging criteria")
     add_bullet_box(s, Inches(0.6), Inches(1.4), Inches(12), Inches(5.5), [
         "APPLICATION OF TECHNOLOGY: 4 ML modules (DBSCAN, OSMnx+BPR, XGBoost, KMeans+TSP) integrated end-to-end into one decision system.",
-        "BUSINESS VALUE: ₹389 Cr/year addressable inefficiency → 4.5× enforcement output with zero extra cost → measurable BTP impact from day one.",
+        "BUSINESS VALUE: ₹389 Cr/year addressable inefficiency → ~3.6× enforcement output with zero extra cost → measurable BTP impact from day one.",
         "ORIGINALITY: Other teams will count violations. Only Park-Watch identifies BTP's structural enforcement blind spot and operationalizes the fix.",
         "PRESENTATION: Live Streamlit dashboard the BTP panel can navigate themselves — filter by station, vehicle, hour. No black box.",
         "DEPLOYABLE: Built entirely on the data BTP already collects. No new hardware. No new data pipeline. Just a dashboard.",
@@ -309,7 +309,7 @@ def build():
     p.font.size = Pt(54); p.font.bold = True; p.font.color.rgb = WHITE
 
     p2 = tx.text_frame.add_paragraph()
-    p2.text = "Same officers. Optimized routes. 4.5× enforcement output."
+    p2.text = "Same officers. Optimized routes. ~3.6× enforcement output."
     p2.alignment = PP_ALIGN.CENTER
     p2.font.size = Pt(22); p2.font.color.rgb = ORANGE
 

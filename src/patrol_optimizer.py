@@ -33,13 +33,19 @@ SERVICE_TIME_MIN = 15              # time to issue tickets at a zone
 PATROL_SPEED_KMH = 20              # realistic urban speed for BTP bikes
 EARTH_R_KM = 6_371
 
-# Patrol home bases — BTP police stations central to top hotspots
+# Patrol home bases — BTP police stations central to top hotspots.
+# Ordered by total violation density in that station's catchment.
 PATROL_HOMES = {
     "Upparpet (KR Market)":     (12.9755, 77.5774),
     "Shivajinagar":             (12.9831, 77.6086),
     "Malleshwaram":             (13.0030, 77.5710),
     "HAL Old Airport":          (12.9595, 77.6493),
     "Vijayanagara":             (12.9719, 77.5390),
+    "City Market":              (12.9628, 77.5749),
+    "Rajajinagar":              (12.9911, 77.5538),
+    "Kodigehalli":              (13.0710, 77.5879),
+    "Magadi Road":              (12.9766, 77.5494),
+    "Jeevanbheemanagar":        (12.9650, 77.6710),
 }
 
 
@@ -123,13 +129,21 @@ def route_one_patrol(
     return out
 
 
-def optimize(fc: pd.DataFrame, hotspots: pd.DataFrame) -> pd.DataFrame:
-    zones = shift_catches(fc)
-    print(f"{len(zones)} hotspots active in shift window "
-          f"{SHIFT_START_HOUR:02d}:00–{SHIFT_END_HOUR:02d}:00")
+def optimize(fc: pd.DataFrame, hotspots: pd.DataFrame,
+             n_patrols: int = N_PATROLS) -> pd.DataFrame:
+    """Build patrol routes for `n_patrols` patrols.
 
-    zones = assign_to_patrols(zones, N_PATROLS)
-    homes = list(PATROL_HOMES.items())
+    `n_patrols` is clamped to the number of defined home bases. The first
+    `n_patrols` entries of PATROL_HOMES (ordered by violation density) are
+    used.
+    """
+    n_patrols = max(1, min(n_patrols, len(PATROL_HOMES)))
+    zones = shift_catches(fc)
+    if len(zones) == 0:
+        return pd.DataFrame()
+
+    zones = assign_to_patrols(zones, n_patrols)
+    homes = list(PATROL_HOMES.items())[:n_patrols]
     all_routes = []
     for i, (home_name, home_latlon) in enumerate(homes):
         patrol_zones = zones[zones["patrol_id"] == i]

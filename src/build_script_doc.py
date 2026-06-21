@@ -166,12 +166,22 @@ def build():
          "Note — five patrols is a demo scenario. The optimizer is parameterized, so in "
          "deployment, BTP would provide their actual nightly fleet size and the routes "
          "scale to match.\n\n"
-         "The output for tonight's evening shift — forty-nine optimised stops across the "
-         "five patrols, one hundred and thirteen expected catches in total. That's "
-         "four-point-five times what BTP catches today, with the same officers and the "
-         "same five-hour shift."),
+         "The output for tonight's evening shift — fifty-four optimised stops across the "
+         "five patrols, roughly ninety-one expected catches in total. That's about "
+         "three-point-six times what BTP catches today, with the same officers and the "
+         "same five-hour shift. And the patrol count is parameterised — slide it up, "
+         "the routes recompute live."),
 
-        ("4:50 – 5:00",
+        ("4:50 – 5:15",
+         "Scroll to the very bottom — the 'Hotspot priority list' table. Briefly scroll through it.",
+         "Finally, every prediction in Park-Watch is interrogable.\n\n"
+         "This is the hotspot priority list — three hundred and eighty-one zones, ranked, "
+         "with the responsible police station, the BTP junction code, the dominant vehicle "
+         "type, the morning, evening, night, and weekend share, and the actual address. A "
+         "BTP officer can drill into any number on the screen.\n\n"
+         "No black box. Every claim Park-Watch makes points back to real data."),
+
+        ("5:15 – 5:30",
          "Slow-scroll back up to the top of the dashboard. Steady cursor.",
          "Park-Watch is the intelligence layer that closes Bengaluru's twelve-hour "
          "enforcement blind spot. It runs on the data BTP already collects. No new "
@@ -215,7 +225,7 @@ def build():
         "Read the script before recording so the words feel natural — not robotic.",
         "Pause briefly at every full stop. Recording feels faster than it is.",
         "If you misspeak, pause for 2 seconds and restart the sentence — easier to edit later.",
-        "Smile when you hit the 4.5× line at 2:25. Judges notice energy.",
+        "Smile when you hit the multiplier line in the patrol section. Judges notice energy.",
         "The script targets ~3:00. If you naturally run to 3:15, that's fine. Aim for under 3:30 total.",
     ]
     for t in tips:

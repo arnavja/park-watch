@@ -10,6 +10,7 @@ from streamlit_folium import st_folium
 
 sys.path.insert(0, str(Path(__file__).parent))
 from data_loader import FULL_DATASET_STATS, is_demo_mode, load
+from patrol_optimizer import optimize as compute_patrol_routes
 
 OUT = Path(__file__).parent.parent / "outputs"
 
@@ -56,9 +57,18 @@ top_n = st.sidebar.slider(
         "violations."
     ),
 )
+n_patrols = st.sidebar.slider(
+    "Patrols deployed (tonight)", 1, 10, 5,
+    help=(
+        "Number of patrol units BTP allocates for the evening shift "
+        "(18:00–23:00). Routes and expected catches recompute live. "
+        "Default 5 is a demo scenario; scale up to match BTP's actual "
+        "nightly fleet."
+    ),
+)
 st.sidebar.caption(
-    "Headline metrics, the cost model, and patrol routes are computed "
-    "over the full 298K-record dataset and the top 100 hotspots."
+    "Headline metrics, the cost model, and forecasts are computed over "
+    "the full 298K-record dataset and the top 100 hotspots."
 )
 
 # No filtering — the dashboard reflects the full dataset
@@ -269,10 +279,30 @@ st_folium(m, height=550, width=None, returned_objects=[])
 st.markdown("---")
 
 # ─── PATROL OPTIMIZER
+@st.cache_data(show_spinner=False)
+def get_routes_for(n: int):
+    if fc is None:
+        return routes
+    out = compute_patrol_routes(fc, hot, n_patrols=n)
+    if out is None or len(out) == 0:
+        return out
+    return out.merge(
+        hot[["cluster_id", "top_station", "top_junction"]].rename(
+            columns={"cluster_id": "cluster"}
+        ),
+        on="cluster", how="left",
+    )
+
+
+dyn_routes = get_routes_for(n_patrols)
+if dyn_routes is not None and len(dyn_routes):
+    routes = dyn_routes
+
 if routes is not None and len(routes):
-    st.subheader("🚓 Tonight's optimized patrol plan (18:00–23:00)")
+    st.subheader(
+        f"🚓 Tonight's optimized patrol plan — {n_patrols} patrols (18:00–23:00)"
+    )
     total_catches = routes["expected_catches"].sum()
-    n_patrols = routes["patrol_home"].nunique()
     n_stops = len(routes)
 
     p1, p2, p3 = st.columns(3)
