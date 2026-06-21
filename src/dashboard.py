@@ -361,73 +361,162 @@ if routes is not None and len(routes):
             st.dataframe(show, use_container_width=True, hide_index=True)
     st.markdown("---")
 
-    # ─── Per-officer shift sheet (printable instructions per patrol)
-    st.subheader("📋 Per-officer shift sheet")
+    # ─── Per-officer shift sheet with LIVE progress tracking
+    st.subheader("📋 Per-officer shift sheet — live tracking")
     st.caption(
-        "Step-by-step orders for the officer on duty. Hand to BTP via WhatsApp "
-        "or print before the shift. Each step lists the destination, arrival "
-        "time, travel duration, and the expected number of catchable violations."
+        "Step-by-step orders with a real-time progress tracker. As each stop "
+        "is completed, the remaining route, ETAs, and expected catches "
+        "recalculate. BTP can replan the rest of the shift on demand."
     )
     homes = sorted(routes["patrol_home"].unique())
     selected = st.selectbox(
         "Select patrol", homes,
         format_func=lambda h: f"🚓 Officer @ {h}",
+        key="patrol_select",
     )
-    pgrp = routes[routes["patrol_home"] == selected].sort_values("seq")
-    pcatches = pgrp["expected_catches"].sum()
-    first_arr = pgrp.iloc[0]["arrive"] if len(pgrp) else "—"
-    last_dep = pgrp.iloc[-1]["depart"] if len(pgrp) else "—"
+    pgrp = routes[routes["patrol_home"] == selected].sort_values("seq").reset_index(drop=True)
 
-    s1, s2, s3 = st.columns(3)
-    s1.metric("Stops tonight", len(pgrp))
-    s2.metric("Expected catches", f"~{pcatches:.0f}")
-    s3.metric("Shift window", f"{first_arr} – {last_dep}")
+    # ── Session-state progress per patrol
+    progress_key = f"completed_{selected}"
+    if progress_key not in st.session_state:
+        st.session_state[progress_key] = 0  # number of steps completed
 
-    st.markdown(f"#### 📝 Orders — Officer based at **{selected}**")
-    st.markdown(
-        f"**Shift start 18:00 · home base: {selected}**  \n"
-        f"Proceed to the first stop. Issue tickets to illegally parked "
-        f"vehicles using your e-challan device. Mark each stop as completed in "
-        f"the app and proceed to the next."
+    completed_n = st.session_state[progress_key]
+    total_n = len(pgrp)
+    done = pgrp.iloc[:completed_n] if completed_n else pgrp.iloc[0:0]
+    remaining = pgrp.iloc[completed_n:]
+
+    # ── Progress KPIs
+    done_catches = done["expected_catches"].sum() if len(done) else 0
+    remaining_catches = remaining["expected_catches"].sum()
+
+    p1, p2, p3, p4 = st.columns(4)
+    p1.metric("Stops done", f"{completed_n} / {total_n}")
+    p2.metric("Catches so far", f"~{done_catches:.0f}")
+    p3.metric("Remaining stops", len(remaining))
+    p4.metric("Catches remaining", f"~{remaining_catches:.0f}")
+
+    st.progress(completed_n / max(1, total_n))
+
+    # ── Action buttons
+    btn1, btn2, btn3 = st.columns([1, 1, 2])
+    if btn1.button("✅ Mark next stop done",
+                    disabled=(completed_n >= total_n),
+                    key=f"mark_{selected}"):
+        st.session_state[progress_key] += 1
+        st.rerun()
+    if btn2.button("🔄 Reset progress", key=f"reset_{selected}"):
+        st.session_state[progress_key] = 0
+        st.rerun()
+    btn3.markdown(
+        "*Replan: nearest-neighbour TSP re-sequences remaining stops from "
+        "the current position (live).*"
     )
 
-    for _, r in pgrp.iterrows():
-        catches = float(r["expected_catches"])
-        cat_word = (
-            "very high (>10)" if catches > 10 else
-            "high (3–10)" if catches > 3 else
-            "moderate (1–3)" if catches > 1 else
-            "low (<1)"
+    # ── Completed stops
+    if len(done):
+        st.markdown("#### ✅ Completed")
+        for _, r in done.iterrows():
+            st.markdown(
+                f"~~Step {int(r['seq'])} · {r['top_station']} "
+                f"({r['top_junction']}) · "
+                f"{r['arrive']} → {r['depart']} · "
+                f"{float(r['expected_catches']):.1f} catches~~"
+            )
+
+    # ── Remaining stops — replan from current position
+    if len(remaining):
+        # Current position = last completed location, or home if none done
+        if completed_n > 0:
+            last = done.iloc[-1]
+            cur_lat, cur_lon = float(last["lat"]), float(last["lon"])
+            cur_time_str = last["depart"]
+        else:
+            from patrol_optimizer import PATROL_HOMES
+            cur_lat, cur_lon = PATROL_HOMES.get(selected, (12.97, 77.59))
+            cur_time_str = "18:00"
+
+        # Re-sequence remaining via nearest-neighbour from current pos
+        from patrol_optimizer import haversine_km, PATROL_SPEED_KMH, SERVICE_TIME_MIN
+
+        def _to_min(s):
+            try:
+                h, m = s.split(":")
+                return int(h) * 60 + int(m)
+            except Exception:
+                return 18 * 60
+
+        cur_time_min = _to_min(cur_time_str)
+        rem = remaining.copy().reset_index(drop=True)
+        new_order = []
+        while len(rem):
+            d_km = haversine_km(
+                cur_lat, cur_lon,
+                rem["lat"].values, rem["lon"].values,
+            )
+            travel_min = d_km / PATROL_SPEED_KMH * 60
+            idx = int(np.argmin(travel_min))
+            chosen = rem.iloc[idx].to_dict()
+            chosen["_new_travel_min"] = float(travel_min[idx])
+            chosen["_new_arrive_min"] = cur_time_min + travel_min[idx]
+            chosen["_new_depart_min"] = chosen["_new_arrive_min"] + SERVICE_TIME_MIN
+            new_order.append(chosen)
+            cur_lat, cur_lon = float(chosen["lat"]), float(chosen["lon"])
+            cur_time_min = chosen["_new_depart_min"]
+            rem = rem.drop(rem.index[idx]).reset_index(drop=True)
+
+        st.markdown("#### ⏳ Remaining (replanned from current position)")
+        for i, r in enumerate(new_order, start=1):
+            ah, am = divmod(int(r["_new_arrive_min"]), 60)
+            dh, dm = divmod(int(r["_new_depart_min"]), 60)
+            catches = float(r["expected_catches"])
+            cat_word = (
+                "very high (>10)" if catches > 10 else
+                "high (3–10)" if catches > 3 else
+                "moderate (1–3)" if catches > 1 else
+                "low (<1)"
+            )
+            st.markdown(
+                f"**Next-{i} → {r['top_station']}**  \n"
+                f"📍 {r['top_junction']}  \n"
+                f"🕐 Arrive **{ah:02d}:{am:02d}** · Depart **{dh:02d}:{dm:02d}** "
+                f"· Travel **{int(r['_new_travel_min'])} min**  \n"
+                f"🎯 Expected catches: **{catches:.1f}** ({cat_word})  \n"
+                f"---"
+            )
+
+        # Time-budget warning if route runs past shift end
+        last_depart_min = new_order[-1]["_new_depart_min"]
+        if last_depart_min > 23 * 60:
+            overrun = last_depart_min - 23 * 60
+            st.warning(
+                f"⚠️  Replanned route runs **{int(overrun)} minutes past "
+                f"shift end (23:00)**. Consider dropping the lowest-value "
+                f"remaining stop. Drop suggestion: "
+                f"**{min(new_order, key=lambda r: r['expected_catches'])['top_station']}** "
+                f"({min(r['expected_catches'] for r in new_order):.1f} expected catches)."
+            )
+    else:
+        st.success(
+            f"🎉 Shift complete. Total bookings: **~{done_catches:.0f}**."
         )
-        st.markdown(
-            f"**Step {int(r['seq'])} → {r['top_station']}**  \n"
-            f"📍 {r['top_junction']}  \n"
-            f"🕐 Arrive **{r['arrive']}** · Depart **{r['depart']}** "
-            f"· Travel **{int(r['travel_min'])} min**  \n"
-            f"🎯 Expected catches: **{catches:.1f}** ({cat_word})  \n"
-            f"---"
-        )
 
-    st.markdown(
-        f"**Shift end {last_dep} · return to {selected}.**  \n"
-        f"Total expected enforcement output: **~{pcatches:.0f} bookings** "
-        f"across **{len(pgrp)} zones**."
-    )
-
-    # Downloadable per-officer sheet
+    # ── Downloadable shift sheet (original + progress notes)
     sheet_lines = [
-        f"PARK-WATCH — Nightly Shift Sheet",
-        f"=" * 50,
+        "PARK-WATCH — Nightly Shift Sheet",
+        "=" * 50,
         f"Officer based at: {selected}",
         f"Shift: 18:00 – 23:00",
-        f"Total stops: {len(pgrp)}",
-        f"Expected catches: ~{pcatches:.0f}",
-        f"",
+        f"Total stops: {total_n}",
+        f"Expected catches: ~{pgrp['expected_catches'].sum():.0f}",
+        f"Progress: {completed_n}/{total_n} done",
+        "",
     ]
     for _, r in pgrp.iterrows():
+        status = "✓ DONE" if int(r["seq"]) <= completed_n else "  TODO"
         sheet_lines.append(
-            f"Step {int(r['seq']):>2}. {r['arrive']} → {r['top_station']:<20} "
-            f"({r['top_junction']:<40}) "
+            f"{status}  Step {int(r['seq']):>2}. {r['arrive']} → "
+            f"{r['top_station']:<20} ({r['top_junction']}) "
             f"~{float(r['expected_catches']):.1f} catches "
             f"({int(r['travel_min'])} min travel)"
         )
@@ -437,7 +526,9 @@ if routes is not None and len(routes):
     st.download_button(
         "📥 Download this patrol's shift sheet (TXT)",
         sheet_txt,
-        file_name=f"shift_sheet_{selected.replace(' ', '_').replace('(', '').replace(')', '')}.txt",
+        file_name=(
+            f"shift_sheet_{selected.replace(' ', '_').replace('(', '').replace(')', '')}.txt"
+        ),
         mime="text/plain",
     )
 
