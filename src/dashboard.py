@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 import folium
+import numpy as np
 import pandas as pd
 import streamlit as st
 from folium.plugins import HeatMap, MarkerCluster
