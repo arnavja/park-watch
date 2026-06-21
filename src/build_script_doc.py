@@ -90,26 +90,21 @@ def build():
     _heading(doc, "The script", size=16, after=4)
 
     sections = [
-        ("0:00 – 0:30",
+        ("0:00 – 0:15",
          "Wait 2 seconds after hitting record. Dashboard header visible.",
-         "Hi, I'm Arnav Jain, and this is Park-Watch — my submission for Theme 1 of the "
-         "Gridlock Hackathon, Team Byte_me_kaar.\n\n"
-         "Bengaluru Traffic Police already collects rich data on illegal parking — almost "
-         "300,000 violation records in just 5 months. The problem isn't a lack of data. The "
-         "problem is that BTP can't see the patterns inside it, and they can't act on those "
-         "patterns in real time. Park-Watch fixes both."),
+         "Hi, I'm Arnav Jain, Team Byte_me_kaar. This is Park-Watch — Bengaluru parking "
+         "enforcement intelligence, my submission for Theme 1 of the Gridlock Hackathon. "
+         "BTP collects almost 300,000 violation records in 5 months. The problem isn't "
+         "data — it's that BTP can't see the patterns inside it or act on them in real "
+         "time. Park-Watch fixes both."),
 
-        ("0:30 – 1:10",
+        ("0:15 – 0:35",
          "Briefly hover over the dashboard so the BTP theme framing lands. Slow cursor.",
-         "The hackathon brief, from BTP themselves, says 3 things. Enforcement is "
-         "patrol-based and reactive. There's no heatmap of parking violations against their "
-         "congestion impact. And it's difficult to prioritize which zones deserve "
-         "enforcement effort.\n\n"
-         "These are operational problems, not data problems. So I built 4 analytical "
-         "modules on the data BTP already has — and combined them into a single dashboard "
-         "an officer can use during a shift."),
+         "BTP's brief flags three things — enforcement is reactive, there's no heatmap "
+         "of violations versus congestion, and zone priority is unclear. I built 4 "
+         "analytical modules to address each, combined into one dashboard."),
 
-        ("1:10 – 2:10",
+        ("0:35 – 1:30",
          "Hover over the bar chart titled 'The 12-hour enforcement blind spot'.",
          "Before I explain the modules, look at this chart. These are the hours when BTP "
          "books violations. Tall bars all morning, peaking around 10 to 11 AM. After 2 PM, "
@@ -120,7 +115,7 @@ def build():
          "This gap is the operational insight Park-Watch is built around. The rest of the "
          "system — cost quantification, forecasting, patrol routing — all exist to close it."),
 
-        ("2:10 – 3:10",
+        ("1:30 – 2:30",
          "Scroll down to the 'Congestion cost' section. Hover briefly over the ₹389 Cr metric.",
          "First question — what does this cost the city?\n\n"
          "For each of the 381 hotspots that my DBSCAN clustering identified, I snap to the "
@@ -135,7 +130,7 @@ def build():
          "month, on its own. And every assumption in this calculation — dwell time, value "
          "of time, lane capacity — is an explicit, defensible knob."),
 
-        ("3:10 – 4:10",
+        ("2:30 – 3:35",
          "Scroll to 'Blind-spot forecast'. Hover over the R² metric so the train→test gap delta is visible.",
          "Next, I built a forecasting model that predicts where violations will happen "
          "during the blind spot.\n\n"
@@ -154,25 +149,18 @@ def build():
          "What does the forecast tell us? Across the top 100 hotspots, roughly 743 illegal "
          "parking incidents will go unbooked in the next 24 hours, unless something "
          "changes.\n\n"
-         "One honest caveat: the dataset captures booked violations, not every illegal "
-         "parking event. So the model predicts violation density extrapolated from "
-         "observed booking patterns — it's a testable hypothesis a 1-week BTP pilot could "
-         "validate."),
+         "One honest caveat: the dataset captures bookings, not every event — a 1-week "
+         "BTP pilot would validate the forecast in the wild."),
 
-        ("4:10 – 4:35",
+        ("3:35 – 3:55",
          "Scroll to the 'Top N illegal-parking hotspots' heatmap. Let Folium render. "
          "Briefly hover over the densest cluster (KR Market area).",
-         "Before I show the patrol plan — here's what 381 hotspots look like on a map of "
-         "Bengaluru. Heat-density overlay shows the parking pressure; red dots are the top "
-         "100 zones ranked by violation count. The dense red cluster in central BLR is "
-         "Upparpet — KR Market, Shivajinagar, Chickpet. Every dot is clickable, and the "
-         "popup shows the station, the junction, the dominant vehicle, and the cost per "
-         "month.\n\n"
-         "Both inputs are configurable in the sidebar — the number of hotspots shown on "
-         "the map, and the number of patrols deployed for tonight's shift. The system "
-         "recomputes routes and ETAs live as you change them."),
+         "381 hotspots on the Bengaluru map. Densest cluster is Upparpet — KR Market. "
+         "Every dot is clickable for station, junction, vehicle mix, and cost. Both the "
+         "hotspot count and the number of patrols deployed are sliders in the sidebar — "
+         "the system recomputes routes and ETAs live."),
 
-        ("4:35 – 5:10",
+        ("3:55 – 4:30",
          "Scroll to 'Tonight's optimized patrol plan'. Let the colour-coded route map render before speaking.",
          "So I converted the forecast into action.\n\n"
          "Weighted K-Means assigns hotspots across 5 patrols, balanced by expected "
@@ -185,7 +173,7 @@ def build():
          "patrols, roughly 96 expected catches in total. That's about 3.8× what BTP "
          "catches today, with the same officers and the same 5-hour shift."),
 
-        ("5:10 – 5:40",
+        ("4:30 – 5:00",
          "Scroll to 'Per-officer shift sheet — live tracking'. Pick a patrol from dropdown. "
          "Click 'Mark next stop done' 2-3 times so judges see the remaining route re-sequence "
          "and ETAs update live.",
@@ -199,7 +187,7 @@ def build():
          "police station, BTP junction code, dominant vehicle type, time-of-day share, "
          "and the actual address. Every prediction is interrogable. No black box."),
 
-        ("5:40 – 6:00",
+        ("5:00 – 5:10",
          "Slow-scroll back up to the top of the dashboard. Steady cursor.",
          "Park-Watch is the intelligence layer that closes Bengaluru's 12-hour enforcement "
          "blind spot. It runs on the data BTP already collects. No new sensors. No new "
@@ -209,10 +197,8 @@ def build():
          "And the system gets better with use. Daily incremental updates, weekly full "
          "retrain on a rolling 6-month window, monthly hotspot re-clustering. Park-Watch "
          "bootstraps as the patrol patterns expand.\n\n"
-         "Park-Watch v1 already routes adaptively per officer with live re-planning. The "
-         "v2 layer adds per-officer learning — each officer's pace, catch rate, and route "
-         "preferences shape their personalized routes over time. The foundation is "
-         "shipped. The personalization is the trajectory.\n\n"
+         "v1 already routes adaptively per officer with live re-planning. v2 adds "
+         "personalized learning over time.\n\n"
          "Thank you."),
     ]
 
