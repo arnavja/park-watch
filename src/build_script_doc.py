@@ -159,7 +159,16 @@ def build():
          "observed booking patterns — it's a testable hypothesis a 1-week BTP pilot could "
          "validate."),
 
-        ("4:10 – 4:50",
+        ("4:10 – 4:35",
+         "Scroll to the 'Top N illegal-parking hotspots' heatmap. Let Folium render. "
+         "Briefly hover over the densest cluster (KR Market area).",
+         "Before I show the patrol plan — here's what 381 hotspots look like on a map of "
+         "Bengaluru. Heat-density overlay shows the parking pressure; red dots are the top "
+         "100 zones ranked by violation count. The dense red cluster in central BLR is "
+         "Upparpet — KR Market, Shivajinagar, Chickpet. Every dot is clickable, and the "
+         "popup shows the station, the junction, the dominant vehicle, the cost per month."),
+
+        ("4:35 – 5:10",
          "Scroll to 'Tonight's optimized patrol plan'. Let the colour-coded route map render before speaking.",
          "So I converted the forecast into action.\n\n"
          "Weighted K-Means assigns hotspots across 5 patrols, balanced by expected "
@@ -173,7 +182,7 @@ def build():
          "catches today, with the same officers and the same 5-hour shift. And the patrol "
          "count is parameterised — slide it up, the routes recompute live."),
 
-        ("4:50 – 5:20",
+        ("5:10 – 5:40",
          "Scroll to 'Per-officer shift sheet — live tracking'. Pick a patrol from dropdown. "
          "Click 'Mark next stop done' 2-3 times so judges see the remaining route re-sequence "
          "and ETAs update live.",
@@ -187,7 +196,7 @@ def build():
          "police station, BTP junction code, dominant vehicle type, time-of-day share, "
          "and the actual address. Every prediction is interrogable. No black box."),
 
-        ("5:20 – 5:40",
+        ("5:40 – 6:00",
          "Slow-scroll back up to the top of the dashboard. Steady cursor.",
          "Park-Watch is the intelligence layer that closes Bengaluru's 12-hour enforcement "
          "blind spot. It runs on the data BTP already collects. No new sensors. No new "
