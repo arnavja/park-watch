@@ -105,9 +105,12 @@ st.markdown("---")
 
 # ─── BLIND SPOT INSIGHT
 st.subheader("🚨 The 12-hour enforcement blind spot")
-hr_counts = (
-    df.groupby("hour").size().reset_index(name="violations")
-)
+# Use pre-computed full-dataset distribution if available, else live filter
+hourly_csv = OUT / "hourly_distribution.csv"
+if hourly_csv.exists():
+    hr_counts = pd.read_csv(hourly_csv)
+else:
+    hr_counts = df.groupby("hour").size().reset_index(name="violations")
 st.bar_chart(hr_counts, x="hour", y="violations", height=240)
 st.caption(
     "BTP officers book ~95% of violations before 3 PM (peak 8 AM–noon). Illegal parking "
