@@ -293,6 +293,7 @@ def build():
         "ORIGINALITY: Other teams will count violations. Only Park-Watch identifies BTP's structural enforcement blind spot and operationalizes the fix.",
         "PRESENTATION: Live Streamlit dashboard the BTP panel can navigate themselves — filter by station, vehicle, hour. No black box.",
         "DEPLOYABLE: Built entirely on the data BTP already collects. No new hardware. No new data pipeline. Just a dashboard.",
+        "ROADMAP: v2 — adaptive per-officer routing. Mobile-app feed re-plans the route after every stop, learns each officer's pace, drops or adds zones based on remaining time.",
     ], size=15)
     add_footer(s, prs)
 

@@ -65,6 +65,23 @@ streamlit run src/dashboard.py
 
 A 30K-row stratified sample of the dataset (`data/sample_violations.parquet`) is shipped so the dashboard runs end-to-end on Streamlit Cloud without the raw 105 MB BTP CSV.
 
+### Production retraining
+
+The full pipeline is automatable via a single command:
+
+```bash
+python3 src/retrain.py                          # 5 patrols, default shift
+python3 src/retrain.py --patrols 8 --shift-start 17 --shift-end 22
+```
+
+Intended schedule:
+```
+# Weekly retrain every Sunday 3 AM
+0 3 * * 0 cd /opt/park-watch && python3 src/retrain.py
+```
+
+Each retrain rebuilds the parquet cache, re-clusters hotspots, recomputes congestion cost, retrains the XGBoost forecast (with overfit guards), and regenerates patrol routes — so the model bootstraps on accumulating BTP data.
+
 ## Stack
 
 - **Data:** pandas, pyarrow (parquet caching)

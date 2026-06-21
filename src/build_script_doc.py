@@ -187,6 +187,10 @@ def build():
          "reactive — which is the actual gap the brief names.\n\n"
          "And the system gets better with use. Each shift's bookings retrain tomorrow's "
          "forecast — Park-Watch bootstraps as the patrol patterns expand.\n\n"
+         "In v2, each patrol receives live, per-officer instructions — adapting in real "
+         "time as officers complete stops, learning each officer's pace, dropping or "
+         "adding zones based on remaining shift time. The current dashboard is the "
+         "foundation; per-officer adaptive routing is the deployment trajectory.\n\n"
          "Thank you."),
     ]
 
