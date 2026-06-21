@@ -178,7 +178,7 @@ def build():
         "3.  BLIND-SPOT FORECAST — XGBoost on 1.38M hourly cells → predicts where evening violations will happen.",
         "4.  PATROL OPTIMIZER — Weighted KMeans + nearest-neighbor TSP → tonight's optimal patrol routes.",
         "5.  DASHBOARD — Streamlit + Folium, with live patrol-count slider for BTP shift planning.",
-        "6.  FEEDBACK LOOP — Production: weekly retrain on new BTP bookings. Each shift's data improves tomorrow's forecast.",
+        "6.  FEEDBACK LOOP — Daily incremental + weekly full retrain + monthly re-cluster. Calendar features capture annual patterns (Diwali, Ganesh Chaturthi, monsoon, school holidays).",
     ], size=16)
     add_footer(s, prs)
 
@@ -226,7 +226,7 @@ def build():
     add_metric_card(s, Inches(6.9), Inches(1.3), Inches(3), Inches(1.4),
                      "+0.07", "Train→Test gap (no overfit)")
     add_metric_card(s, Inches(10.1), Inches(1.3), Inches(2.9), Inches(1.4),
-                     "722 / day", "unbooked violations forecast")
+                     "743 / day", "unbooked violations forecast")
     add_bullet_box(s, Inches(0.5), Inches(3.0), Inches(5.5), Inches(4), [
         "Features (11): hour, dow, month, weekend, lag-1h/-24h/-7d, roll-7d, lat, lon, vehicle.",
         "Top importances: lag-1h (34%), roll-7d (16%), lag-24h (10%).",
@@ -258,9 +258,9 @@ def build():
     add_metric_card(s, Inches(3.7), Inches(1.3), Inches(3), Inches(1.4),
                      "49", "optimized stops (5-hr shift)")
     add_metric_card(s, Inches(6.9), Inches(1.3), Inches(3), Inches(1.4),
-                     "~91", "expected catches tonight")
+                     "~96", "expected catches tonight")
     add_metric_card(s, Inches(10.1), Inches(1.3), Inches(2.9), Inches(1.4),
-                     "~3.6×", "vs current BTP output (~25)")
+                     "~3.8×", "vs current BTP output (~25)")
     add_bullet_box(s, Inches(0.5), Inches(3.0), Inches(5.5), Inches(4), [
         "Patrols home-base: 5 real BTP stations — Upparpet, Shivajinagar, Malleshwaram, HAL Old Airport, Vijayanagara.",
         "Weighted KMeans → fair workload assignment by expected catches.",
@@ -268,7 +268,7 @@ def build():
         "20 km/h urban speed + 15 min service per zone.",
         "Patrol count is a parameter — demo shows 5; in deployment, scales to BTP's actual nightly fleet.",
         "Output: per-officer schedule with ETA, stop sequence, expected catches.",
-        "Same officer-hours, same budget. ~3.6× more enforcement output.",
+        "Same officer-hours, same budget. ~3.8× more enforcement output.",
     ], size=12)
     img = SCREENS / "04_hotspot_map.png"
     if img.exists():
@@ -289,7 +289,7 @@ def build():
     add_title_bar(s, prs, "Alignment with judging criteria")
     add_bullet_box(s, Inches(0.6), Inches(1.4), Inches(12), Inches(5.5), [
         "APPLICATION OF TECHNOLOGY: 4 ML modules (DBSCAN, OSMnx+BPR, XGBoost, KMeans+TSP) integrated end-to-end into one decision system.",
-        "BUSINESS VALUE: ₹389 Cr/year addressable inefficiency → ~3.6× enforcement output with zero extra cost → measurable BTP impact from day one.",
+        "BUSINESS VALUE: ₹389 Cr/year addressable inefficiency → ~3.8× enforcement output with zero extra cost → measurable BTP impact from day one.",
         "ORIGINALITY: Other teams will count violations. Only Park-Watch identifies BTP's structural enforcement blind spot and operationalizes the fix.",
         "PRESENTATION: Live Streamlit dashboard the BTP panel can navigate themselves — filter by station, vehicle, hour. No black box.",
         "DEPLOYABLE: Built entirely on the data BTP already collects. No new hardware. No new data pipeline. Just a dashboard.",
@@ -311,7 +311,7 @@ def build():
     p.font.size = Pt(54); p.font.bold = True; p.font.color.rgb = WHITE
 
     p2 = tx.text_frame.add_paragraph()
-    p2.text = "Same officers. Optimized routes. ~3.6× enforcement output."
+    p2.text = "Same officers. Optimized routes. ~3.8× enforcement output."
     p2.alignment = PP_ALIGN.CENTER
     p2.font.size = Pt(22); p2.font.color.rgb = ORANGE
 

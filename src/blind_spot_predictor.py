@@ -75,14 +75,20 @@ def add_features(panel: pd.DataFrame, hotspots: pd.DataFrame) -> pd.DataFrame:
         on="cluster", how="left",
     )
 
+    # Annual / seasonal calendar features (festivals, monsoon, day-of-year)
+    from calendar_features import add_calendar_features
+    panel = add_calendar_features(panel, dt_col="hour_dt")
+
     return panel.dropna().reset_index(drop=True)
 
+
+from calendar_features import CALENDAR_FEATS
 
 FEATS = [
     "hour", "dow", "month", "is_weekend",
     "lag_1h", "lag_24h", "lag_7d", "roll_7d",
     "lat", "lon", "top_vehicle_idx",
-]
+] + CALENDAR_FEATS
 
 
 def train_eval(panel: pd.DataFrame):
@@ -112,8 +118,15 @@ def train_eval(panel: pd.DataFrame):
         n_jobs=-1, random_state=1,
         early_stopping_rounds=30,
     )
+    # Time-decay sample weights: more recent observations matter more.
+    # half-life ≈ 90 days → weights for old data decay smoothly.
+    latest = train["hour_dt"].max()
+    age_days = (latest - train["hour_dt"]).dt.total_seconds() / 86400
+    sample_w = np.exp(-age_days / 90.0).clip(lower=0.1)
+
     model.fit(
         train[FEATS], train["violations"],
+        sample_weight=sample_w,
         eval_set=[(train[FEATS], train["violations"]),
                   (val[FEATS],   val["violations"])],
         verbose=False,
@@ -191,6 +204,9 @@ def forecast_blind_spots(model, panel: pd.DataFrame) -> pd.DataFrame:
             rows.append(r)
 
     fc = pd.DataFrame(rows)
+    # Calendar features need adding at inference time too
+    from calendar_features import add_calendar_features
+    fc = add_calendar_features(fc, dt_col="hour_dt")
     fc["pred"] = np.clip(model.predict(fc[FEATS]), 0, None)
     fc["is_blind_spot_hour"] = ~fc["hour"].between(8, 14)
     return fc
