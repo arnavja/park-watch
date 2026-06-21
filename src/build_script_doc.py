@@ -173,16 +173,21 @@ def build():
          "catches today, with the same officers and the same 5-hour shift. And the patrol "
          "count is parameterised — slide it up, the routes recompute live."),
 
-        ("4:50 – 5:15",
-         "Scroll to the very bottom — the 'Hotspot priority list' table. Briefly scroll through it.",
-         "Finally, every prediction in Park-Watch is interrogable.\n\n"
-         "This is the hotspot priority list — 381 zones, ranked, with the responsible "
-         "police station, the BTP junction code, the dominant vehicle type, the morning, "
-         "evening, night, and weekend share, and the actual address. A BTP officer can "
-         "drill into any number on the screen.\n\n"
-         "No black box. Every claim Park-Watch makes points back to real data."),
+        ("4:50 – 5:20",
+         "Scroll to 'Per-officer shift sheet — live tracking'. Pick a patrol from dropdown. "
+         "Click 'Mark next stop done' 2-3 times so judges see the remaining route re-sequence "
+         "and ETAs update live.",
+         "Each patrol also gets a per-officer shift sheet — printable, downloadable, "
+         "sendable on WhatsApp.\n\n"
+         "Watch what happens as I mark stops complete. The remaining route re-sequences "
+         "from the current position, ETAs update live, and if the replanned route runs "
+         "past shift-end, the system flags which low-value stop to drop. That's real-time "
+         "adaptive routing — working in v1 today.\n\n"
+         "Below it sits the hotspot priority list — 381 zones, ranked, with the responsible "
+         "police station, BTP junction code, dominant vehicle type, time-of-day share, "
+         "and the actual address. Every prediction is interrogable. No black box."),
 
-        ("5:15 – 5:30",
+        ("5:20 – 5:40",
          "Slow-scroll back up to the top of the dashboard. Steady cursor.",
          "Park-Watch is the intelligence layer that closes Bengaluru's 12-hour enforcement "
          "blind spot. It runs on the data BTP already collects. No new sensors. No new "
@@ -192,10 +197,10 @@ def build():
          "And the system gets better with use. Daily incremental updates, weekly full "
          "retrain on a rolling 6-month window, monthly hotspot re-clustering. Park-Watch "
          "bootstraps as the patrol patterns expand.\n\n"
-         "In v2, each patrol receives live, per-officer instructions — adapting in real "
-         "time as officers complete stops, learning each officer's pace, dropping or "
-         "adding zones based on remaining shift time. The current dashboard is the "
-         "foundation; per-officer adaptive routing is the deployment trajectory.\n\n"
+         "Park-Watch v1 already routes adaptively per officer with live re-planning. The "
+         "v2 layer adds per-officer learning — each officer's pace, catch rate, and route "
+         "preferences shape their personalized routes over time. The foundation is "
+         "shipped. The personalization is the trajectory.\n\n"
          "Thank you."),
     ]
 
