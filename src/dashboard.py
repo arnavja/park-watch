@@ -447,24 +447,49 @@ if routes is not None and len(routes):
             except Exception:
                 return 18 * 60
 
-        cur_time_min = _to_min(cur_time_str)
-        rem = remaining.copy().reset_index(drop=True)
-        new_order = []
-        while len(rem):
-            d_km = haversine_km(
-                cur_lat, cur_lon,
-                rem["lat"].values, rem["lon"].values,
-            )
-            travel_min = d_km / PATROL_SPEED_KMH * 60
-            idx = int(np.argmin(travel_min))
-            chosen = rem.iloc[idx].to_dict()
-            chosen["_new_travel_min"] = float(travel_min[idx])
-            chosen["_new_arrive_min"] = cur_time_min + travel_min[idx]
-            chosen["_new_depart_min"] = chosen["_new_arrive_min"] + SERVICE_TIME_MIN
-            new_order.append(chosen)
-            cur_lat, cur_lon = float(chosen["lat"]), float(chosen["lon"])
-            cur_time_min = chosen["_new_depart_min"]
-            rem = rem.drop(rem.index[idx]).reset_index(drop=True)
+        SHIFT_END_MIN = 23 * 60
+        cur_time_min_initial = _to_min(cur_time_str)
+
+        def plan_route(stops_df, start_lat, start_lon, start_time_min):
+            """Value-density nearest-neighbour from start position."""
+            r_lat, r_lon, t = start_lat, start_lon, start_time_min
+            order = []
+            rem = stops_df.copy().reset_index(drop=True)
+            while len(rem):
+                d_km = haversine_km(r_lat, r_lon, rem["lat"].values, rem["lon"].values)
+                tm = d_km / PATROL_SPEED_KMH * 60
+                score = rem["expected_catches"].values / (tm + SERVICE_TIME_MIN + 1e-6)
+                idx = int(np.argmax(score))
+                ch = rem.iloc[idx].to_dict()
+                ch["_new_travel_min"] = float(tm[idx])
+                ch["_new_arrive_min"] = t + tm[idx]
+                ch["_new_depart_min"] = ch["_new_arrive_min"] + SERVICE_TIME_MIN
+                order.append(ch)
+                r_lat, r_lon = float(ch["lat"]), float(ch["lon"])
+                t = ch["_new_depart_min"]
+                rem = rem.drop(rem.index[idx]).reset_index(drop=True)
+            return order
+
+        # First pass — try to visit ALL remaining stops
+        new_order = plan_route(remaining, cur_lat, cur_lon, cur_time_min_initial)
+        dropped_stops = []
+
+        # Time-budget aware: if route overruns shift end, drop lowest-value
+        # stops one at a time and re-plan until everything fits.
+        while new_order and new_order[-1]["_new_depart_min"] > SHIFT_END_MIN:
+            visited_clusters = {r["cluster"] for r in new_order}
+            kept = remaining[remaining["cluster"].isin(visited_clusters)].copy()
+            if kept.empty:
+                break
+            lowest_idx = kept["expected_catches"].idxmin()
+            dropped = kept.loc[lowest_idx].to_dict()
+            dropped_stops.append(dropped)
+            kept = kept.drop(lowest_idx).reset_index(drop=True)
+            if kept.empty:
+                new_order = []
+                break
+            new_order = plan_route(kept, cur_lat, cur_lon, cur_time_min_initial)
+        cur_time_min = new_order[-1]["_new_depart_min"] if new_order else cur_time_min_initial
 
         st.markdown("#### ⏳ Remaining (replanned from current position)")
         for i, r in enumerate(new_order, start=1):
@@ -486,17 +511,21 @@ if routes is not None and len(routes):
                 f"---"
             )
 
-        # Time-budget warning if route runs past shift end
-        last_depart_min = new_order[-1]["_new_depart_min"]
-        if last_depart_min > 23 * 60:
-            overrun = last_depart_min - 23 * 60
+        # Show actually-dropped stops (time-budget aware reorder)
+        if dropped_stops:
+            dropped_total = sum(d["expected_catches"] for d in dropped_stops)
             st.warning(
-                f"⚠️  Replanned route runs **{int(overrun)} minutes past "
-                f"shift end (23:00)**. Consider dropping the lowest-value "
-                f"remaining stop. Drop suggestion: "
-                f"**{min(new_order, key=lambda r: r['expected_catches'])['top_station']}** "
-                f"({min(r['expected_catches'] for r in new_order):.1f} expected catches)."
+                f"⚠️  Auto-dropped **{len(dropped_stops)} low-value stop(s)** "
+                f"to fit the 5-hour shift window. "
+                f"Total catches forgone: **{dropped_total:.1f}**. "
+                f"Re-sequenced route prioritizes highest value-per-minute zones."
             )
+            with st.expander("View dropped stops"):
+                for d in dropped_stops:
+                    st.markdown(
+                        f"• {d['top_station']} ({d['top_junction']}) — "
+                        f"{float(d['expected_catches']):.1f} expected catches"
+                    )
     else:
         st.success(
             f"🎉 Shift complete. Total bookings: **~{done_catches:.0f}**."
