@@ -425,17 +425,38 @@ if routes is not None and len(routes):
                 f"{float(r['expected_catches']):.1f} catches~~"
             )
 
-    # ── Remaining stops — replan from current position
+    # ── Remaining stops — replan from current IST time + position
     if len(remaining):
+        # Real IST clock — drives realistic ETAs
+        from datetime import datetime, timezone, timedelta
+        ist = timezone(timedelta(hours=5, minutes=30))
+        now_ist = datetime.now(tz=ist)
+        ist_clock_str = now_ist.strftime("%H:%M")
+        now_min = now_ist.hour * 60 + now_ist.minute
+
+        # Clamp to shift window 18:00–23:00
+        SHIFT_START_MIN = 18 * 60
+        if now_min < SHIFT_START_MIN or now_min > 23 * 60:
+            now_min = SHIFT_START_MIN
+            ist_clock_str = "18:00 (shift start)"
+
+        st.info(
+            f"🕐 Live IST clock: **{ist_clock_str}** — ETAs computed from this time."
+        )
+
         # Current position = last completed location, or home if none done
         if completed_n > 0:
             last = done.iloc[-1]
             cur_lat, cur_lon = float(last["lat"]), float(last["lon"])
-            cur_time_str = last["depart"]
+            # Use the LATER of scheduled-depart or actual-IST-clock
+            sched_min = sum(int(x) * f for x, f in zip(
+                last["depart"].split(":"), (60, 1)
+            ))
+            cur_time_str = f"{max(now_min, sched_min)//60:02d}:{max(now_min, sched_min)%60:02d}"
         else:
             from patrol_optimizer import PATROL_HOMES
             cur_lat, cur_lon = PATROL_HOMES.get(selected, (12.97, 77.59))
-            cur_time_str = "18:00"
+            cur_time_str = f"{now_min//60:02d}:{now_min%60:02d}"
 
         # Re-sequence remaining via nearest-neighbour from current pos
         from patrol_optimizer import haversine_km, PATROL_SPEED_KMH, SERVICE_TIME_MIN
