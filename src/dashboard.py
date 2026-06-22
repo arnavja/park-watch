@@ -59,14 +59,24 @@ top_n = st.sidebar.slider(
     ),
 )
 n_patrols = st.sidebar.slider(
-    "Patrols deployed (tonight)", 1, 10, 5,
+    "Patrols deployed", 1, 10, 5,
     help=(
-        "Number of patrol units BTP allocates for the evening shift "
-        "(18:00–23:00). Routes and expected catches recompute live. "
-        "Default 5 is a demo scenario; scale up to match BTP's actual "
-        "nightly fleet."
+        "Number of patrol units BTP allocates for the shift. "
+        "Routes and expected catches recompute live. "
+        "Default 5 is a demo scenario; scale up to match BTP's actual fleet."
     ),
 )
+shift_window = st.sidebar.slider(
+    "Patrol shift window (24h)", 0, 23, (18, 23),
+    help=(
+        "Real BTP blind spot starts at ~15:00 (when bookings collapse) and "
+        "extends into the next morning. The default 18:00–23:00 covers the "
+        "commercial evening rush. Slide to 15:00 to see the broader gap."
+    ),
+)
+shift_start, shift_end = shift_window
+if shift_end - shift_start < 2:
+    shift_end = shift_start + 2
 st.sidebar.caption(
     "Headline metrics, the cost model, and forecasts are computed over "
     "the full 298K-record dataset and the top 100 hotspots."
@@ -284,10 +294,11 @@ st.markdown("---")
 
 # ─── PATROL OPTIMIZER
 @st.cache_data(show_spinner=False)
-def get_routes_for(n: int):
+def get_routes_for(n: int, s_start: int, s_end: int):
     if fc is None:
         return routes
-    out = compute_patrol_routes(fc, hot, n_patrols=n)
+    out = compute_patrol_routes(fc, hot, n_patrols=n,
+                                  shift_start=s_start, shift_end=s_end)
     if out is None or len(out) == 0:
         return out
     return out.merge(
@@ -298,13 +309,13 @@ def get_routes_for(n: int):
     )
 
 
-dyn_routes = get_routes_for(n_patrols)
+dyn_routes = get_routes_for(n_patrols, shift_start, shift_end)
 if dyn_routes is not None and len(dyn_routes):
     routes = dyn_routes
 
 if routes is not None and len(routes):
     st.subheader(
-        f"🚓 Tonight's optimized patrol plan — {n_patrols} patrols (18:00–23:00)"
+        f"🚓 Tonight's optimized patrol plan — {n_patrols} patrols ({shift_start:02d}:00–{shift_end:02d}:00)"
     )
     total_catches = routes["expected_catches"].sum()
     n_stops = len(routes)
@@ -434,11 +445,12 @@ if routes is not None and len(routes):
         ist_clock_str = now_ist.strftime("%H:%M")
         now_min = now_ist.hour * 60 + now_ist.minute
 
-        # Clamp to shift window 18:00–23:00
-        SHIFT_START_MIN = 18 * 60
-        if now_min < SHIFT_START_MIN or now_min > 23 * 60:
+        # Clamp to current shift window from sidebar
+        SHIFT_START_MIN = shift_start * 60
+        SHIFT_END_MIN_CLAMP = shift_end * 60
+        if now_min < SHIFT_START_MIN or now_min > SHIFT_END_MIN_CLAMP:
             now_min = SHIFT_START_MIN
-            ist_clock_str = "18:00 (shift start)"
+            ist_clock_str = f"{shift_start:02d}:00 (shift start)"
 
         st.info(
             f"🕐 Live IST clock: **{ist_clock_str}** — ETAs computed from this time."
@@ -468,7 +480,7 @@ if routes is not None and len(routes):
             except Exception:
                 return 18 * 60
 
-        SHIFT_END_MIN = 23 * 60
+        SHIFT_END_MIN = shift_end * 60
         cur_time_min_initial = _to_min(cur_time_str)
 
         def plan_route(stops_df, start_lat, start_lon, start_time_min):
@@ -557,7 +569,7 @@ if routes is not None and len(routes):
         "PARK-WATCH — Nightly Shift Sheet",
         "=" * 50,
         f"Officer based at: {selected}",
-        f"Shift: 18:00 – 23:00",
+        f"Shift: {shift_start:02d}:00 – {shift_end:02d}:00",
         f"Total stops: {total_n}",
         f"Expected catches: ~{pgrp['expected_catches'].sum():.0f}",
         f"Progress: {completed_n}/{total_n} done",

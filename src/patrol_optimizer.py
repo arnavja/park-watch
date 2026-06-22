@@ -56,9 +56,11 @@ def haversine_km(lat1, lon1, lat2, lon2):
     return 2 * EARTH_R_KM * np.arcsin(np.sqrt(a))
 
 
-def shift_catches(fc: pd.DataFrame) -> pd.DataFrame:
+def shift_catches(fc: pd.DataFrame,
+                   shift_start: int = SHIFT_START_HOUR,
+                   shift_end: int = SHIFT_END_HOUR) -> pd.DataFrame:
     """Total predicted violations per hotspot during the shift window."""
-    shift = fc[fc["hour"].between(SHIFT_START_HOUR, SHIFT_END_HOUR)]
+    shift = fc[fc["hour"].between(shift_start, shift_end)]
     g = shift.groupby("cluster").agg(
         expected_catches=("pred", "sum"),
         lat=("lat", "first"),
@@ -80,12 +82,14 @@ def assign_to_patrols(zones: pd.DataFrame, n_patrols: int) -> pd.DataFrame:
 
 
 def route_one_patrol(
-    zones: pd.DataFrame, home_name: str, home_latlon: tuple
+    zones: pd.DataFrame, home_name: str, home_latlon: tuple,
+    shift_start: int = SHIFT_START_HOUR,
+    shift_end: int = SHIFT_END_HOUR,
 ) -> pd.DataFrame:
     """Nearest-neighbor sequencing from home, with cumulative ETA & catches."""
     remaining = zones.copy().reset_index(drop=True)
     cur_lat, cur_lon = home_latlon
-    cur_time = SHIFT_START_HOUR * 60  # minutes from midnight
+    cur_time = shift_start * 60  # minutes from midnight
 
     stops = []
     while len(remaining):
@@ -104,7 +108,7 @@ def route_one_patrol(
         travel_t = travel_min[idx]
         arrive = cur_time + travel_t
         depart = arrive + SERVICE_TIME_MIN
-        if depart > SHIFT_END_HOUR * 60:
+        if depart > shift_end * 60:
             break
 
         stops.append({
@@ -130,15 +134,17 @@ def route_one_patrol(
 
 
 def optimize(fc: pd.DataFrame, hotspots: pd.DataFrame,
-             n_patrols: int = N_PATROLS) -> pd.DataFrame:
-    """Build patrol routes for `n_patrols` patrols.
+             n_patrols: int = N_PATROLS,
+             shift_start: int = SHIFT_START_HOUR,
+             shift_end: int = SHIFT_END_HOUR) -> pd.DataFrame:
+    """Build patrol routes for `n_patrols` patrols across the shift window.
 
     `n_patrols` is clamped to the number of defined home bases. The first
     `n_patrols` entries of PATROL_HOMES (ordered by violation density) are
     used.
     """
     n_patrols = max(1, min(n_patrols, len(PATROL_HOMES)))
-    zones = shift_catches(fc)
+    zones = shift_catches(fc, shift_start=shift_start, shift_end=shift_end)
     if len(zones) == 0:
         return pd.DataFrame()
 
@@ -147,7 +153,9 @@ def optimize(fc: pd.DataFrame, hotspots: pd.DataFrame,
     all_routes = []
     for i, (home_name, home_latlon) in enumerate(homes):
         patrol_zones = zones[zones["patrol_id"] == i]
-        route = route_one_patrol(patrol_zones, home_name, home_latlon)
+        route = route_one_patrol(patrol_zones, home_name, home_latlon,
+                                  shift_start=shift_start,
+                                  shift_end=shift_end)
         if len(route):
             all_routes.append(route)
     return pd.concat(all_routes, ignore_index=True) if all_routes else pd.DataFrame()
