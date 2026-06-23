@@ -67,17 +67,55 @@ n_patrols = st.sidebar.slider(
         "Default 5 is a demo scenario; scale up to match BTP's actual fleet."
     ),
 )
-shift_window = st.sidebar.slider(
-    "Patrol shift window (24h)", 0, 23, (18, 23),
+# Karnataka Police Manual Chapter 22 specifies a 3-shift relief system for
+# civil police. BTP, as a wing of Bengaluru City Police, operates under
+# these defaults. Source: ksp.gov.in/Page.aspx?page=Police%20Manual%20Chapter%2022
+KPM_SHIFTS = {
+    "Morning (KPM 07:00–13:00)":   (7, 13),
+    "Afternoon (KPM 13:00–21:00)": (13, 21),
+    "Evening (demo default, 18:00–23:00)": (18, 23),
+    "Custom (use slider below)":   None,
+}
+shift_preset = st.sidebar.radio(
+    "Patrol shift",
+    list(KPM_SHIFTS.keys()),
+    index=2,
     help=(
-        "Real BTP blind spot starts at ~15:00 (when bookings collapse) and "
-        "extends into the next morning. The default 18:00–23:00 covers the "
-        "commercial evening rush. Slide to 15:00 to see the broader gap."
+        "Karnataka Police Manual Ch. 22 codifies a 3-shift relief system. "
+        "Night shift 21:00–07:00 crosses midnight — handled in v2. "
+        "Officers check in via ASTraM geo-tagged e-attendance at shift start."
     ),
 )
-shift_start, shift_end = shift_window
-if shift_end - shift_start < 2:
-    shift_end = shift_start + 2
+preset_window = KPM_SHIFTS[shift_preset]
+
+if preset_window:
+    shift_start, shift_end = preset_window
+    st.sidebar.caption(
+        f"📜 *Per Karnataka Police Manual Ch. 22 — civil police 3-shift relief.*"
+    )
+else:
+    shift_window = st.sidebar.slider(
+        "Custom shift window (24h)", 0, 23, (18, 23),
+        help=(
+            "BTP blind spot starts ~15:00 (when bookings collapse). "
+            "Slide handles to set any custom window."
+        ),
+    )
+    shift_start, shift_end = shift_window
+    if shift_end - shift_start < 2:
+        shift_end = shift_start + 2
+
+# Informal meal-break buffer — per Citizen Matters, BTP officers take a
+# 15–20 min meal break by the road when traffic permits, not in roster.
+include_meal_break = st.sidebar.checkbox(
+    "Reserve 20 min for informal meal break",
+    value=False,
+    help=(
+        "Per Citizen Matters reporting, BTP officers eat by the road in "
+        "15–20 minutes when traffic permits — no formal lunch slot in the "
+        "roster. Enabling this reserves 20 min of shift time as buffer."
+    ),
+)
 st.sidebar.caption(
     "Headline metrics, the cost model, and forecasts are computed over "
     "the full 298K-record dataset and the top 100 hotspots."
@@ -447,7 +485,9 @@ if routes is not None and len(routes):
         true_now_min = now_ist.hour * 60 + now_ist.minute
 
         SHIFT_START_MIN = shift_start * 60
-        SHIFT_END_MIN_CLAMP = shift_end * 60
+        # Trim the effective shift end by 20 min if meal break is reserved
+        meal_buffer = 20 if include_meal_break else 0
+        SHIFT_END_MIN_CLAMP = shift_end * 60 - meal_buffer
 
         # Decide effective planning time + appropriate banner message
         if true_now_min < SHIFT_START_MIN:
@@ -497,7 +537,7 @@ if routes is not None and len(routes):
             except Exception:
                 return 18 * 60
 
-        SHIFT_END_MIN = shift_end * 60
+        SHIFT_END_MIN = shift_end * 60 - (20 if include_meal_break else 0)
         cur_time_min_initial = _to_min(cur_time_str)
 
         def plan_route(stops_df, start_lat, start_lon, start_time_min):
