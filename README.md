@@ -120,4 +120,8 @@ park-watch/
 
 - Arnav Jain — [@arnavja](https://github.com/arnavja)
 
+## Questions or issues?
+
+Contact the project author: **arnav17032006@gmail.com**
+
 Built for the **Gridlock Hackathon** organised by Flipkart HQ × Bengaluru Traffic Police × HackerEarth.

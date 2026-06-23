@@ -19,7 +19,8 @@ st.set_page_config(page_title="Park-Watch BLR", layout="wide")
 st.title("🅿️ Park-Watch — Bengaluru Parking Enforcement Intelligence")
 st.caption(
     "298K real BTP violations · 5 months · 381 hotspots clustered · "
-    "Built for Gridlock Hackathon @ Flipkart HQ"
+    "Built for Gridlock Hackathon @ Flipkart HQ · "
+    "Questions: arnav17032006@gmail.com"
 )
 
 if is_demo_mode():
