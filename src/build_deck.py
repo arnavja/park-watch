@@ -137,9 +137,10 @@ def build():
     add_bullet_box(s, Inches(0.6), Inches(3.3), Inches(12), Inches(3.5), [
         "Every record: geo-tagged (lat/lon), timestamped, vehicle type, violation type, station, junction.",
         "~100% are parking-related: WRONG PARKING (27K), NO PARKING (23K), MAIN ROAD (4K), FOOTPATH (616)…",
-        "Bounding box: lat 12.8 – 13.3, lon 77.4 – 77.8 — full BBMP area.",
+        "Bounding box: lat 12.8 – 13.3, lon 77.4 – 77.8 — full GBA/BBMP area.",
         "Vehicle mix: Scooter (95K), Car (89K), Motorcycle (41K), Passenger Auto (38K).",
-    ], size=14)
+        "Scale context: 1.23 Cr registered vehicles · 14.4M population · ~4,792 traffic officers · ratio 1:2,303 vs BPR&D recommended 1:700.",
+    ], size=13)
     add_footer(s, prs)
 
     # ── 4 · THE KILLER INSIGHT  (with screenshot of blind-spot chart)
@@ -467,7 +468,8 @@ def build():
 
     add_bullet_box(s, Inches(0.5), Inches(1.3), Inches(12.5), Inches(5.5), [
         "DATASET CAPTURES BOOKINGS, NOT ALL VIOLATIONS — forecast extrapolates from booked patterns. A 1-week BTP pilot validates the forecast in the wild.",
-        "PATROL FLEET SIZE IS A PARAMETER — demo runs 5 patrols. In deployment, BTP supplies actual nightly fleet count (likely 50–200). Routes scale linearly.",
+        "PATROL FLEET + SHIFT WINDOW ARE PARAMETERS — demo runs 5 patrols in an evening window. BTP supplies actual roster — including the continuous towing patrols already running across 154 hotspots (DH, Apr 2026).",
+        "JURISDICTIONAL SPLIT — BTP enforces, GBA/BBMP sets parking policy. Park-Watch supports both: enforcement priorities for BTP, hotspot analytics for GBA planners.",
         "BPR ASSUMPTIONS — dwell time (12 min), value-of-time (₹200/hr), lane capacity (1800 vph) are explicit knobs at the top of congestion_cost.py.",
         "OSM ROAD METADATA — lane counts and speed limits default to 2 lanes / 30 km/h when missing. Affects ~5% of edges in Bengaluru.",
         "EVENING DATA IS SPARSE — model trained on bookings from active enforcement hours. Predictions for 18:00–07:00 are extrapolations. Bootstraps once patrols arrive.",

@@ -169,9 +169,10 @@ def build():
          "Note — 5 patrols is a demo scenario. The optimizer is parameterized, so in "
          "deployment, BTP would provide their actual nightly fleet size and the routes "
          "scale to match.\n\n"
-         "The output for tonight's evening shift — 53 optimised stops across the 5 "
-         "patrols, roughly 96 expected catches in total. That's about 3.8× what BTP "
-         "catches today, with the same officers and the same 5-hour shift."),
+         "For the demo I show a 5-hour evening window — 53 optimised stops across 5 "
+         "patrols, roughly 96 expected catches. About 3.8× the current per-shift output. "
+         "The window is parameterized — BTP can supply their actual roster, including "
+         "the continuous towing patrols they already run."),
 
         ("4:30 – 5:00",
          "Scroll to 'Per-officer shift sheet — live tracking'. Pick a patrol from dropdown. "

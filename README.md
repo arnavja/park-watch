@@ -20,7 +20,7 @@ Park-Watch turns **298,450 real BTP parking-violation records** (Nov 2023 – Ap
 | Economic cost per year | **₹389 Cr** (~10% of BLR's ₹38,000 Cr congestion bill) |
 | Forecast accuracy (held-out test set) | **R² = 0.43**, MAE = 0.23, train→test gap +0.07 (no overfit) |
 | Predicted unbooked violations per 24h | **743** |
-| Patrol-output improvement over current schedule | **~3.8×** (96 catches vs ~25 in a 5-hour evening shift, 5 patrols) |
+| Patrol-output improvement over per-shift baseline | **~3.8×** (96 catches vs ~25 in a 5-hour window, 5 patrols — shift/fleet are parameterized) |
 
 ## The key insight
 
