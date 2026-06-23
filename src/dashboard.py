@@ -284,23 +284,29 @@ st.subheader(f"🗺️ Top {top_n} illegal-parking hotspots")
 hot_n = hot.head(top_n)
 m = folium.Map(location=[12.97, 77.59], zoom_start=12, tiles="cartodbpositron")
 
-# Heatmap of all filtered violations — yellow → orange → red gradient
-# (high-contrast against the carto-positron basemap, intuitive "hot zone" colors)
-if len(f):
-    sample = f.sample(min(20000, len(f)), random_state=1)
+# Heatmap — one weighted point per hotspot (not 20K raw points) so dense
+# areas don't blur into one big blob. Weight = log(violations) so KR Market
+# (56K) doesn't completely dominate Malleshwaram (10K).
+import math
+hot_points = [
+    [r["lat"], r["lon"], math.log1p(r["n_violations"])]
+    for _, r in hot_n.iterrows()
+]
+if hot_points:
+    max_w = max(p[2] for p in hot_points)
     HeatMap(
-        sample[["latitude", "longitude"]].values.tolist(),
-        radius=10,
-        blur=8,
-        min_opacity=0.5,
-        max_zoom=14,
+        hot_points,
+        radius=18,
+        blur=14,
+        min_opacity=0.55,
+        max_zoom=15,
+        max_val=max_w,
         gradient={
-            0.0: "#FFFACD",   # pale cream — low density
-            0.3: "#FFD166",   # warm yellow
-            0.5: "#FF9E2C",   # amber
-            0.7: "#F25C05",   # deep orange
-            0.9: "#D7263D",   # red
-            1.0: "#8B0000",   # dark red — hottest
+            0.0: "#FFE066",   # warm yellow — low density
+            0.3: "#FFA500",   # orange
+            0.55: "#FF4500",  # orange-red
+            0.75: "#DC143C",  # crimson
+            1.0: "#7A0010",   # dark red — hottest
         },
     ).add_to(m)
 
