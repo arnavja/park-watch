@@ -271,11 +271,23 @@ if blind is not None and fc is not None:
         f"({blind.iloc[0]['top_station']}):**"
     )
     st.bar_chart(fc_top, x="hour_label", y="pred", height=240)
-    st.caption(
-        "Bars represent predicted violations per hour. Hours outside 8 AM–"
-        "2 PM are the enforcement blind spot — these violations would "
-        "currently go unbooked."
-    )
+    with st.expander("ℹ️ How this forecast is built"):
+        st.markdown(
+            "**Per hour**, XGBoost takes 18 features and outputs a predicted "
+            "violation count:\n"
+            "- **Calendar:** hour, day-of-week, month, weekend, day-of-year, "
+            "festival flag, festival-window flag, monsoon, month-end\n"
+            "- **Autoregressive lags:** violations 1h ago, 24h ago, "
+            "7 days ago — these dominate the model (38% of feature "
+            "importance combined)\n"
+            "- **Rolling trend:** 7-day moving average of recent "
+            "violations at this hotspot\n"
+            "- **Spatial:** lat, lon\n"
+            "- **Vehicle mix:** most common type at this hotspot\n\n"
+            "The bars chart 24 sequential predictions. Hours outside "
+            "8 AM–2 PM are the enforcement blind spot — these violations "
+            "would currently go unbooked."
+        )
 
     st.markdown("---")
 
@@ -690,7 +702,7 @@ if routes is not None and len(routes):
     st.markdown("---")
 
 # ─── HOTSPOT TABLE
-st.subheader("📋 Hotspot priority list")
+st.subheader(f"📋 Hotspot priority list — top {top_n} of 381")
 show = hot_n[[
     "cluster_id", "n_violations", "top_station", "top_junction",
     "top_vehicle", "share_morning", "share_evening", "share_night",
