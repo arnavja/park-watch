@@ -442,19 +442,35 @@ if routes is not None and len(routes):
         from datetime import datetime, timezone, timedelta
         ist = timezone(timedelta(hours=5, minutes=30))
         now_ist = datetime.now(tz=ist)
-        ist_clock_str = now_ist.strftime("%H:%M")
-        now_min = now_ist.hour * 60 + now_ist.minute
+        true_ist_str = now_ist.strftime("%H:%M")
+        true_now_min = now_ist.hour * 60 + now_ist.minute
 
-        # Clamp to current shift window from sidebar
         SHIFT_START_MIN = shift_start * 60
         SHIFT_END_MIN_CLAMP = shift_end * 60
-        if now_min < SHIFT_START_MIN or now_min > SHIFT_END_MIN_CLAMP:
-            now_min = SHIFT_START_MIN
-            ist_clock_str = f"{shift_start:02d}:00 (shift start)"
 
-        st.info(
-            f"🕐 Live IST clock: **{ist_clock_str}** — ETAs computed from this time."
-        )
+        # Decide effective planning time + appropriate banner message
+        if true_now_min < SHIFT_START_MIN:
+            now_min = SHIFT_START_MIN
+            st.info(
+                f"🕐 IST clock: **{true_ist_str}** · Shift starts at "
+                f"**{shift_start:02d}:00** — ETAs computed from shift start "
+                f"({SHIFT_END_MIN_CLAMP - SHIFT_START_MIN} min window)."
+            )
+        elif true_now_min > SHIFT_END_MIN_CLAMP:
+            now_min = SHIFT_START_MIN
+            st.warning(
+                f"🕐 IST clock: **{true_ist_str}** · Shift "
+                f"{shift_start:02d}:00–{shift_end:02d}:00 has ended. "
+                f"Showing what the plan would have looked like from shift start."
+            )
+        else:
+            now_min = true_now_min
+            remaining_min = SHIFT_END_MIN_CLAMP - now_min
+            st.info(
+                f"🕐 IST clock: **{true_ist_str}** · "
+                f"**{remaining_min} min** left in shift "
+                f"({shift_start:02d}:00–{shift_end:02d}:00) · ETAs from now."
+            )
 
         # Current position = last completed location, or home if none done
         if completed_n > 0:
@@ -507,17 +523,30 @@ if routes is not None and len(routes):
         new_order = plan_route(remaining, cur_lat, cur_lon, cur_time_min_initial)
         dropped_stops = []
 
-        # Time-budget aware: if route overruns shift end, drop lowest-value
-        # stops one at a time and re-plan until everything fits.
+        # Time-budget aware: drop stops by lowest value-per-minute (catches
+        # ÷ (travel_min + service_min)) rather than just lowest absolute
+        # catches. A small zone far away costs more time per catch than a
+        # nearby medium zone, so the far-away one drops first.
         while new_order and new_order[-1]["_new_depart_min"] > SHIFT_END_MIN:
-            visited_clusters = {r["cluster"] for r in new_order}
-            kept = remaining[remaining["cluster"].isin(visited_clusters)].copy()
-            if kept.empty:
-                break
-            lowest_idx = kept["expected_catches"].idxmin()
-            dropped = kept.loc[lowest_idx].to_dict()
-            dropped_stops.append(dropped)
-            kept = kept.drop(lowest_idx).reset_index(drop=True)
+            # Compute value-per-minute for each currently scheduled stop
+            scored = [
+                {
+                    **r,
+                    "_value_per_min": float(r["expected_catches"]) / max(
+                        1.0,
+                        float(r["_new_travel_min"]) + 15.0,
+                    ),
+                }
+                for r in new_order
+            ]
+            worst = min(scored, key=lambda r: r["_value_per_min"])
+            dropped_stops.append(worst)
+            kept = remaining[
+                remaining["cluster"] != worst["cluster"]
+            ].copy()
+            # Also remove any previously dropped clusters from the candidate set
+            dropped_clusters = {d["cluster"] for d in dropped_stops}
+            kept = kept[~kept["cluster"].isin(dropped_clusters)]
             if kept.empty:
                 new_order = []
                 break
@@ -547,17 +576,21 @@ if routes is not None and len(routes):
         # Show actually-dropped stops (time-budget aware reorder)
         if dropped_stops:
             dropped_total = sum(d["expected_catches"] for d in dropped_stops)
+            shift_len = shift_end - shift_start
             st.warning(
-                f"⚠️  Auto-dropped **{len(dropped_stops)} low-value stop(s)** "
-                f"to fit the 5-hour shift window. "
-                f"Total catches forgone: **{dropped_total:.1f}**. "
-                f"Re-sequenced route prioritizes highest value-per-minute zones."
+                f"⚠️  Auto-dropped **{len(dropped_stops)} low-yield stop(s)** "
+                f"to fit the {shift_len}-hour shift window. "
+                f"Catches forgone: **{dropped_total:.1f}**. "
+                f"Dropped by lowest value-per-minute (catches ÷ time cost), "
+                f"so far-away small zones go first."
             )
             with st.expander("View dropped stops"):
                 for d in dropped_stops:
+                    vpm = d.get("_value_per_min", 0)
                     st.markdown(
-                        f"• {d['top_station']} ({d['top_junction']}) — "
-                        f"{float(d['expected_catches']):.1f} expected catches"
+                        f"• **{d['top_station']}** ({d['top_junction']}) — "
+                        f"{float(d['expected_catches']):.1f} catches · "
+                        f"{vpm:.3f} catches/min cost"
                     )
     else:
         st.success(
