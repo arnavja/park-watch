@@ -284,12 +284,24 @@ st.subheader(f"🗺️ Top {top_n} illegal-parking hotspots")
 hot_n = hot.head(top_n)
 m = folium.Map(location=[12.97, 77.59], zoom_start=12, tiles="cartodbpositron")
 
-# Heatmap of all filtered violations
+# Heatmap of all filtered violations — yellow → orange → red gradient
+# (high-contrast against the carto-positron basemap, intuitive "hot zone" colors)
 if len(f):
     sample = f.sample(min(20000, len(f)), random_state=1)
     HeatMap(
         sample[["latitude", "longitude"]].values.tolist(),
-        radius=8, blur=12, min_opacity=0.3,
+        radius=10,
+        blur=8,
+        min_opacity=0.5,
+        max_zoom=14,
+        gradient={
+            0.0: "#FFFACD",   # pale cream — low density
+            0.3: "#FFD166",   # warm yellow
+            0.5: "#FF9E2C",   # amber
+            0.7: "#F25C05",   # deep orange
+            0.9: "#D7263D",   # red
+            1.0: "#8B0000",   # dark red — hottest
+        },
     ).add_to(m)
 
 cost_map = {}
